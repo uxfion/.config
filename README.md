@@ -1,11 +1,14 @@
 # My Config Files
 
-## Modules
+<details>
+<summary><h2>Config Version</h2></summary>
 
-- [kitty](https://github.com/kovidgoyal/kitty): `0.32.1`
-- [lazyvim](https://github.com/LazyVim/starter): `741ff3aa70336abb6c76ee4c49815ae589a1b852`
-- [tmux](https://github.com/gpakosz/.tmux): `b892bc155b6df087b05868995fc6e2cd8b5bbb98`
-- [yazi](https://github.com/sxyazi/yazi/tree/main/yazi-config/preset): `0.2.3`
+- [Kitty](https://github.com/kovidgoyal/kitty): `0.32.1`
+- [LazyVim](https://github.com/LazyVim/starter): `741ff3aa70336abb6c76ee4c49815ae589a1b852`
+- [.tmux](https://github.com/gpakosz/.tmux): `b892bc155b6df087b05868995fc6e2cd8b5bbb98`
+- [Yazi](https://github.com/sxyazi/yazi/tree/main/yazi-config/preset): `0.2.3`
+
+</details>
 
 ## Installation
 
@@ -15,9 +18,10 @@ rm -rf ~/.config/coc ~/.config/ranger
 rm -rf ~/.local/share/ranger
 rm -rf ~/.config/kitty ~/.config/nvim ~/.config/tmux ~/.config/yazi
 rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim
+bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh
 ```
 
-### Font: JetBrains Mono Nerd Font
+### Font: [JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
 
 <details>
 <summary><b>Brew</b></summary>
@@ -38,7 +42,7 @@ sudo apt install xxx  # TODO
 
 </details>
 
-### Terminal Emulator: Kitty
+### Terminal Emulator: [Kitty](https://sw.kovidgoyal.net/kitty/)
 
 <details>
 <summary><b>Brew</b></summary>
@@ -58,7 +62,7 @@ curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 </details>
 
-### File Manager: Yazi
+### File Manager: [Yazi](https://yazi-rs.github.io/docs/installation)
 
 <details>
 <summary><b>Brew</b></summary>
@@ -81,7 +85,7 @@ cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
 
 </details>
 
-### Text Editor: LazyVim
+### Text Editor: [LazyVim](https://www.lazyvim.org/)
 
 <details>
 <summary><b>Brew</b></summary>
@@ -97,8 +101,6 @@ brew install node@20 && brew link --overwrite node@20
 
 npm install -g neovim
 pip install pynvim
-
-
 ```
 
 </details>
@@ -128,9 +130,9 @@ NODE_MAJOR=20
 echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_$NODE_MAJOR.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
 sudo apt-get update && sudo apt-get install nodejs -y
 
-# # rust (no necessary)
-# # curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
-# # rust fd::fd-find, rg::ripgrep
+# rust (no necessary)
+# curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+# rust fd::fd-find, rg::ripgrep
 
 npm install -g neovim
 pip install pynvim
@@ -138,7 +140,7 @@ pip install pynvim
 
 </details>
 
-### Git GUI: Lazygit
+### Git GUI: [Lazygit](https://github.com/jesseduffield/lazygit)
 
 <details>
 <summary><b>Brew</b></summary>
@@ -157,7 +159,7 @@ LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/re
 # amd64
 curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_x86_64.tar.gz"
 # arm64
-curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_arm64.tar.gz"
+# curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_arm64.tar.gz"
 
 tar xf lazygit.tar.gz lazygit
 sudo install lazygit /usr/local/bin
@@ -165,7 +167,7 @@ sudo install lazygit /usr/local/bin
 
 </details>
 
-### Tmux
+### Multiplexer: [Tmux](https://github.com/tmux/tmux/wiki)
 
 <details>
 <summary><b>Brew</b></summary>
