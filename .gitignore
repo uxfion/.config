@@ -1,0 +1,16 @@
+# 首先排除所有文件和目录
+*
+
+# 然后重新包含想要跟踪的目录
+!README.md
+!.gitignore
+!/kitty/
+!/nvim/
+!/tmux/
+!/yazi/
+
+# 如果在这些目录中还有不想跟踪的文件，可以在此处添加规则排除
+# 例如，排除所有的 .tmp 文件
+*.tmp
+.DS_Store
+lazy-lock.json
