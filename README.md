@@ -9,13 +9,26 @@
 
 ## Installation
 
-- Font
+- Font: [JetBrains Mono Nerd Font]()
+
+<details>
+<summary><h3>Brew</h3></summary>
 
 ```bash
 brew tap homebrew/cask-fonts
-brew install font-smiley-sans
 brew install font-jetbrains-mono-nerd-font
 ```
+
+</details>
+
+<details>
+<summary><h3>Linux</h3></summary>
+
+```bash
+sudo apt install xxx
+```
+
+</details>
 
 - Terminal Emulator
 
@@ -50,6 +63,8 @@ brew install lazygit
 ```bash
 brew install tmux
 ```
+
+## Config
 
 - First Time
 
