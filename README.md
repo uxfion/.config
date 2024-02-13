@@ -194,7 +194,7 @@ tmux -V
 
 ## 🚀 Config
 
-- 1️⃣ First Time
+### 1️⃣ Download Config
 
 ```bash
 cd ~/.config
@@ -204,7 +204,24 @@ git pull origin main
 git branch --set-upstream-to=origin/main main
 ```
 
-- 1️⃣ My Rc
+### 2️⃣ Support [kitty-diff](https://sw.kovidgoyal.net/kitty/kittens/diff/) with Git
+
+`vim ~/.gitconfig`
+
+```bash
+[diff]
+  tool = kitty
+  guitool = kitty.gui
+[difftool]
+  prompt = false
+  trustExitCode = true
+[difftool "kitty"]
+  cmd = kitten diff $LOCAL $REMOTE
+[difftool "kitty.gui"]
+  cmd = kitten diff $LOCAL $REMOTE
+```
+
+### 3️⃣ Config My Rc
 
 `vim ~/.bashrc` or `vim ~/.zshrc`
 
