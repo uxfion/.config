@@ -22,7 +22,7 @@ rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim
 bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh
 ```
 
-### 📝 Font: [🔤 JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
+### 1. 📝 Font: [🔤 JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
@@ -43,7 +43,7 @@ sudo apt install xxx  # TODO
 
 </details>
 
-### 📟 Terminal Emulator: [🐈 Kitty](https://sw.kovidgoyal.net/kitty/)
+### 2. 📟 Terminal Emulator: [🐈 Kitty](https://sw.kovidgoyal.net/kitty/)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
@@ -63,7 +63,7 @@ curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 </details>
 
-### 🗃️ File Manager: [🦆 Yazi](https://yazi-rs.github.io/docs/installation)
+### 3. 🗃️ File Manager: [🦆 Yazi](https://yazi-rs.github.io/docs/installation)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
@@ -81,22 +81,21 @@ brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
 cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-x86_64-unknown-linux-gnu.zip
 unzip yazi-x86_64-unknown-linux-gnu.zip
 cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
-# TODO: requirtments
+# requirtments
+sudo apt update && sudo apt install -y unar jq fd-find ripgrep fzf zoxide
+# no necessary
+sudo apt install -y ffmpegthumbnailer poppler 
 ```
 
 </details>
 
-### ✏️ Text Editor: [🛌 LazyVim](https://www.lazyvim.org/)
+### 4. ✏️ Text Editor: [🛌 LazyVim](https://www.lazyvim.org/)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew install nvim rustup fd ripgrep
-
-# test
-fd lua  # find file name
-rg lua  # find file text
 
 brew install node@20 && brew link --overwrite node@20
 
@@ -120,10 +119,6 @@ chmod +x /usr/local/bin/nvim.appimage && ln -sf /usr/local/bin/nvim.appimage /us
 sudo apt update && sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip
 sudo apt install fd-find ripgrep
 
-# test
-fd lua  # find file name
-rg lua  # find file text
-
 # node
 sudo mkdir -p /etc/apt/keyrings
 curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
@@ -141,7 +136,7 @@ pip install pynvim
 
 </details>
 
-### 🔢 Git GUI: [💤 Lazygit](https://github.com/jesseduffield/lazygit)
+### 5. 🔢 Git GUI: [💤 Lazygit](https://github.com/jesseduffield/lazygit)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
@@ -168,7 +163,7 @@ sudo install lazygit /usr/local/bin
 
 </details>
 
-### 📟 Multiplexer: [🎛️ Tmux](https://github.com/tmux/tmux/wiki)
+### 6. 📟 Multiplexer: [🎛️ Tmux](https://github.com/tmux/tmux/wiki)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
@@ -215,6 +210,8 @@ if [ -f ~/.config/myrc.sh ]; then
   source ~/.config/myrc.sh
 fi
 ```
+
+then `source ~/.bashrc` or `source ~/.zshrc`
 
 - 🎉 Update
 
