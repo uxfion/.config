@@ -2,9 +2,9 @@ export PATH=~/.local/bin:$PATH
 export PATH=~/.config/bin:$PATH
 
 if [[ $SHELL == */bash ]]; then
-	eval "$(zoxide init bash)"
+    eval "$(zoxide init bash)"
 elif [[ $SHELL == */zsh ]]; then
-	eval "$(zoxide init zsh)"
+    eval "$(zoxide init zsh)"
 fi
 
 # alias cd='z'
@@ -17,12 +17,12 @@ alias dpp='docker system prune -a'
 
 alias r='ya'
 function ya() {
-	local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
-	yazi "$@" --cwd-file="$tmp"
-	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-		cd -- "$cwd"
-	fi
-	rm -f -- "$tmp"
+    local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+        cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
 }
 
 export EDITOR='nvim'
@@ -44,5 +44,5 @@ alias lsh='ls --hyperlink=auto'
 alias up='kitten transfer --direction=upload'
 
 down() {
-	kitten transfer "$@" /Users/lecter/Downloads/
+    kitten transfer "$@" /Users/lecter/Downloads/
 }
