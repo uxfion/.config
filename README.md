@@ -1,16 +1,16 @@
-# My Config Files
+# 🛠️ My Config Files
 
 <details>
-<summary><h2>Config Version</h2></summary>
+<summary><h2>🔢 Config Version</h2></summary>
 
-- [Kitty](https://github.com/kovidgoyal/kitty): `0.32.1`
-- [LazyVim](https://github.com/LazyVim/starter): `741ff3aa70336abb6c76ee4c49815ae589a1b852`
-- [.tmux](https://github.com/gpakosz/.tmux): `b892bc155b6df087b05868995fc6e2cd8b5bbb98`
-- [Yazi](https://github.com/sxyazi/yazi/tree/main/yazi-config/preset): `0.2.3`
+- [🐈 Kitty](https://github.com/kovidgoyal/kitty): `0.32.1`
+- [🛌 LazyVim](https://github.com/LazyVim/starter): `741ff3aa70336abb6c76ee4c49815ae589a1b852`
+- [🎛️ .tmux](https://github.com/gpakosz/.tmux): `b892bc155b6df087b05868995fc6e2cd8b5bbb98`
+- [🦆 Yazi](https://github.com/sxyazi/yazi/tree/main/yazi-config/preset): `0.2.3`
 
 </details>
 
-## Installation
+## ⚙️ Installation
 
 ```bash
 # clean
@@ -21,10 +21,10 @@ rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim
 bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh
 ```
 
-### Font: [JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
+### 📝 Font: [JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
 
 <details>
-<summary><b>Brew</b></summary>
+<summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew tap homebrew/cask-fonts
@@ -34,7 +34,7 @@ brew install font-jetbrains-mono-nerd-font
 </details>
 
 <details>
-<summary><b>Linux</b></summary>
+<summary><b>📟 Linux</b></summary>
 
 ```bash
 sudo apt install xxx  # TODO
@@ -42,10 +42,10 @@ sudo apt install xxx  # TODO
 
 </details>
 
-### Terminal Emulator: [Kitty](https://sw.kovidgoyal.net/kitty/)
+### 📟 Terminal Emulator: [🐈 Kitty](https://sw.kovidgoyal.net/kitty/)
 
 <details>
-<summary><b>Brew</b></summary>
+<summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew install kitty
@@ -54,7 +54,7 @@ brew install kitty
 </details>
 
 <details>
-<summary><b>Linux</b></summary>
+<summary><b>📟 Linux</b></summary>
 
 ```bash
 curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
@@ -62,10 +62,10 @@ curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 </details>
 
-### File Manager: [Yazi](https://yazi-rs.github.io/docs/installation)
+### 🗃️ File Manager: [🦆 Yazi](https://yazi-rs.github.io/docs/installation)
 
 <details>
-<summary><b>Brew</b></summary>
+<summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
@@ -74,7 +74,7 @@ brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
 </details>
 
 <details>
-<summary><b>Linux</b></summary>
+<summary><b>📟 Linux</b></summary>
 
 ```bash
 cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-x86_64-unknown-linux-gnu.zip
@@ -85,10 +85,10 @@ cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
 
 </details>
 
-### Text Editor: [LazyVim](https://www.lazyvim.org/)
+### ✏️ Text Editor: [🛌 LazyVim](https://www.lazyvim.org/)
 
 <details>
-<summary><b>Brew</b></summary>
+<summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew install nvim rustup fd ripgrep
@@ -106,7 +106,7 @@ pip install pynvim
 </details>
 
 <details>
-<summary><b>Linux</b></summary>
+<summary><b>📟 Linux</b></summary>
 
 ```bash
 # nvim
@@ -140,10 +140,10 @@ pip install pynvim
 
 </details>
 
-### Git GUI: [Lazygit](https://github.com/jesseduffield/lazygit)
+### 🔢 Git GUI: [💤 Lazygit](https://github.com/jesseduffield/lazygit)
 
 <details>
-<summary><b>Brew</b></summary>
+<summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew install lazygit
@@ -152,7 +152,7 @@ brew install lazygit
 </details>
 
 <details>
-<summary><b>Linux</b></summary>
+<summary><b>📟 Linux</b></summary>
 
 ```bash
 LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
@@ -167,10 +167,10 @@ sudo install lazygit /usr/local/bin
 
 </details>
 
-### Multiplexer: [Tmux](https://github.com/tmux/tmux/wiki)
+### 📟 Multiplexer: [🎛️ Tmux](https://github.com/tmux/tmux/wiki)
 
 <details>
-<summary><b>Brew</b></summary>
+<summary><b>🍺 Brew</b></summary>
 
 ```bash
 brew install tmux
@@ -179,7 +179,7 @@ brew install tmux
 </details>
 
 <details>
-<summary><b>Linux</b></summary>
+<summary><b>📟 Linux</b></summary>
 
 ```bash
 sudo apt install tmux
@@ -191,9 +191,9 @@ tmux -V
 
 </details>
 
-## Config
+## 🚀 Config
 
-- First Time
+- 1️⃣ First Time
 
 ```bash
 cd ~/.config
@@ -203,7 +203,7 @@ git pull origin main
 git branch --set-upstream-to=origin/main main
 ```
 
-- Update
+- 🎉 Update
 
 ```bash
 cd ~/.config && git pull
