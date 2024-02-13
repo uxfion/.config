@@ -7,7 +7,7 @@ elif [[ $SHELL == */zsh ]]; then
 	eval "$(zoxide init zsh)"
 fi
 
-alias cd='z'
+# alias cd='z'
 
 alias dc='docker compose'
 alias dr='dc down && dc pull && dc build && dc up -d'
@@ -39,3 +39,6 @@ alias lzg='lazygit'
 alias diff='kitten diff'
 alias icat='kitten icat'
 alias gdiff='git difftool --no-symlinks --dir-diff'
+alias lsh='ls --hyperlink=auto'
+alias down='kitten transfer'
+alias up='kitten transfer --direction=upload'

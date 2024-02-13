@@ -15,8 +15,11 @@
 
 ```bash
 # clean
-rm -rf ~/.config/coc ~/.config/ranger
-rm -rf ~/.local/share/ranger
+brew uninstall ranger joshuto
+sudo apt remove ranger
+rm -rf /usr/local/bin/joshuto /usr/local/bin/vim
+rm -rf ~/.config/coc ~/.config/ranger ~/.config/joshuto ~/.config/lvim
+rm -rf ~/.local/share/ranger ~/.local/share/lunarvim* ~/.local/share/lvim
 rm -rf ~/.config/kitty ~/.config/nvim ~/.config/tmux ~/.config/yazi
 rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim
 bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh
@@ -82,7 +85,7 @@ cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-x86
 unzip yazi-x86_64-unknown-linux-gnu.zip
 cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
 # requirtments
-sudo apt update && sudo apt install -y unar jq fd-find ripgrep fzf zoxide
+sudo apt update && sudo apt install -y file unar jq fd-find ripgrep fzf zoxide
 # no necessary
 sudo apt install -y ffmpegthumbnailer poppler 
 ```
@@ -211,10 +214,10 @@ if [ -f ~/.config/myrc.sh ]; then
 fi
 ```
 
-then `source ~/.bashrc` or `source ~/.zshrc`
-
 - 🎉 Update
 
 ```bash
 cd ~/.config && git pull
 ```
+
+then `source ~/.bashrc` or `source ~/.zshrc`
