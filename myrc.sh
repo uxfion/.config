@@ -40,5 +40,9 @@ alias diff='kitten diff'
 alias icat='kitten icat'
 alias gdiff='git difftool --no-symlinks --dir-diff'
 alias lsh='ls --hyperlink=auto'
-alias down='kitten transfer'
+# alias down='kitten transfer'
 alias up='kitten transfer --direction=upload'
+
+down() {
+	kitten transfer "$@" /Users/lecter/Downloads/
+}

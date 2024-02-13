@@ -204,7 +204,7 @@ git pull origin main
 git branch --set-upstream-to=origin/main main
 ```
 
-### 2️⃣ Support [kitty-diff](https://sw.kovidgoyal.net/kitty/kittens/diff/) with Git
+### 2️⃣ Support [🐈 kitty-diff](https://sw.kovidgoyal.net/kitty/kittens/diff/) with Git
 
 `vim ~/.gitconfig`
 
