@@ -1,0 +1,59 @@
+#!/bin/bash
+
+# Define helper functions first
+mbclean() {
+	# perl -lne 's!/upload/!/p/!; print $1 if /^location: (.*)$/i'
+	awk '/^location: /{sub(/\/upload\//,"/p/"); print $2}'
+}
+
+upload_file() {
+	curl -is -X POST https://bin.lecter.one/upload -F "file=@$1" | mbclean
+}
+
+upload_text() {
+	curl -is -X POST https://bin.lecter.one/upload -F "content=$1" | mbclean
+}
+
+# Check if an argument is provided
+if [[ -n $1 ]]; then
+	# Check if the argument is a file
+	if [[ -f $1 ]]; then
+		# Prompt user for choice
+		echo "File detected. Choose an option:"
+		echo "1. Upload file (default)"
+		echo "2. Upload text from file"
+		echo "Enter choice (1 or 2): "
+		read choice
+		choice=${choice:-1}
+		case $choice in
+		1) upload_file "$1" ;;
+		2) upload_text "$(cat $1)" ;; # Modified to ensure text content is uploaded
+		*)
+			echo "Invalid choice"
+			exit 1
+			;;
+		esac
+	# Check if the argument is a directory
+	elif [[ -d $1 ]]; then
+		echo "Error: '$1' is a directory. This script can only handle files and text."
+		exit 1
+	else
+		# If it's not a file or directory, assume it's a string and upload the string
+		upload_text "$1"
+	fi
+elif [[ ! -t 0 ]]; then
+	# If no argument is provided and stdin is not from the terminal, read from stdin and upload
+	upload_text "$(cat -)"
+else
+	# If no input is provided, print usage instructions
+	echo "Error: No input provided."
+	echo "Usage:"
+	echo "  mb <text_string>"
+	echo "  mb <file_path>"
+	echo "  mb < file_path"
+	echo "  echo \"hello world\" | mb"
+	echo "  command | mb (e.g., 'python test.py | mb')"
+	echo "  command 2>&1 | mb (e.g., 'python test.py 2>&1 | mb')"
+	echo "  command 2>&1 | tee /dev/tty | mb (e.g., 'python test.py 2>&1 | tee /dev/tty | mb')"
+	exit 1
+fi

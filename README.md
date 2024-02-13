@@ -10,7 +10,8 @@
 
 </details>
 
-## ⚙️ Installation
+<details>
+<summary><h2>⚙️ Installation</h2></summary>
 
 ```bash
 # clean
@@ -21,7 +22,7 @@ rm -rf ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim
 bash ~/.local/share/lunarvim/lvim/utils/installer/uninstall.sh
 ```
 
-### 📝 Font: [JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
+### 📝 Font: [🔤 JetBrains Mono Nerd Font](https://github.com/ryanoasis/nerd-fonts/releases/latest)
 
 <details>
 <summary><b>🍺 Brew</b></summary>
@@ -191,6 +192,8 @@ tmux -V
 
 </details>
 
+</details>
+
 ## 🚀 Config
 
 - 1️⃣ First Time
@@ -201,6 +204,16 @@ git init && git branch -M main
 git remote add origin https://github.com/uxfion/.config.git
 git pull origin main
 git branch --set-upstream-to=origin/main main
+```
+
+- 1️⃣ My Rc
+
+`vim ~/.bashrc` or `vim ~/.zshrc`
+
+```bash
+if [ -f ~/.config/myrc.sh ]; then
+  source ~/.config/myrc.sh
+fi
 ```
 
 - 🎉 Update
