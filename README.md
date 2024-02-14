@@ -87,7 +87,7 @@ cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
 # requirtments
 sudo apt update && sudo apt install -y file unar jq fd-find ripgrep fzf zoxide
 # no necessary
-sudo apt install -y ffmpegthumbnailer poppler 
+sudo apt install -y ffmpegthumbnailer poppler-utils
 ```
 
 </details>
@@ -227,14 +227,17 @@ git branch --set-upstream-to=origin/main main
 
 ```bash
 if [ -f ~/.config/myrc.sh ]; then
-  source ~/.config/myrc.sh
+    source ~/.config/myrc.sh
 fi
 ```
 
-- 🎉 Update
+then `source ~/.bashrc` or `source ~/.zshrc`
+
+### 🎉 Update
 
 ```bash
 cd ~/.config && git pull
 ```
 
-then `source ~/.bashrc` or `source ~/.zshrc`
+then `source ~/.config/myrc.sh`
+
