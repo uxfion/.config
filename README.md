@@ -73,7 +73,7 @@ curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 ```bash
 brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
-# TODO: ubuntu20.04 has no zoxide
+
 ```
 
 </details>
@@ -82,16 +82,24 @@ brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
 <summary><b>📟 Linux</b></summary>
 
 ```bash
+# yazi amd64
 cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-x86_64-unknown-linux-gnu.zip
 unzip yazi-x86_64-unknown-linux-gnu.zip
 cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
-# # aarch64
+
+# yazi aarch64
+cargo install --locked yazi-fm
 # cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-aarch64-unknown-linux-gnu.zip
 # unzip yazi-aarch64-unknown-linux-gnu.zip
 # cp yazi-aarch64-unknown-linux-gnu/yazi /usr/local/bin/
 # TODO: `yazi: /lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.33' not found (required by yazi)`
+
 # requirtments
 sudo apt update && sudo apt install -y file unar jq fd-find ripgrep fzf zoxide
+
+# TODO: ubuntu20.04 has no zoxide
+curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+
 # no necessary
 sudo apt install -y ffmpegthumbnailer poppler-utils
 ```
@@ -118,11 +126,19 @@ pip install pynvim
 <summary><b>📟 Linux</b></summary>
 
 ```bash
-# nvim
+# nvim amd64
 sudo apt install libfuse2
 wget https://github.com/neovim/neovim/releases/download/stable/nvim.appimage -O /usr/local/bin/nvim.appimage
 chmod +x /usr/local/bin/nvim.appimage && ln -sf /usr/local/bin/nvim.appimage /usr/local/bin/nvim
-# TODO: aarch64
+
+# nvim aarch64
+# git clone https://github.com/neovim/neovim.git
+cd ~/dl/neovim
+git tag -d stable && git pull
+git checkout stable
+rm -r build/
+make CMAKE_BUILD_TYPE=Release
+sudo make install
 
 # requirements
 sudo apt update && sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip
