@@ -73,6 +73,7 @@ curl -L https://sw.kovidgoyal.net/kitty/installer.sh | sh /dev/stdin
 
 ```bash
 brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
+# TODO: ubuntu20.04 has no zoxide
 ```
 
 </details>
@@ -84,6 +85,11 @@ brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
 cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-x86_64-unknown-linux-gnu.zip
 unzip yazi-x86_64-unknown-linux-gnu.zip
 cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
+# # aarch64
+# cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-aarch64-unknown-linux-gnu.zip
+# unzip yazi-aarch64-unknown-linux-gnu.zip
+# cp yazi-aarch64-unknown-linux-gnu/yazi /usr/local/bin/
+# TODO: `yazi: /lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.33' not found (required by yazi)`
 # requirtments
 sudo apt update && sudo apt install -y file unar jq fd-find ripgrep fzf zoxide
 # no necessary
@@ -186,6 +192,7 @@ tmux -V
 
 # wget https://github.com/nelsonenzo/tmux-appimage/releases/download/3.3a/tmux.appimage -O /usr/local/bin/tmux.appimage
 # chmod +x /usr/local/bin/tmux.appimage && ln -sf /usr/local/bin/nvim.appimage /usr/local/bin/nvim
+# TODO: aarch64
 ```
 
 </details>
