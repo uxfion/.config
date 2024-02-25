@@ -1,0 +1,37 @@
+#!/bin/bash
+
+case "$1" in
+    -d)
+        # 使用 'nohup' 和 'exec' 在后台执行并重定向输出到日志文件
+        pkill -f nutstore
+        pkill -f xvfb
+        mkdir -p ~/dl/logs/nut # 确保日志目录存在
+        sleep 1
+        xvfb-run sh -c "exec ~/.nutstore/dist/bin/nutstore-pydaemon.py" >~/dl/logs/nut/nut.log 2>&1 &
+        tail -f ~/dl/logs/nut/nut.log
+        ;;
+    log)
+        # 查看日志文件
+        tail -f ~/dl/logs/nut/nut.log
+        ;;
+    ps)
+        # 显示所有 nutstore 的进程
+        ps aux | grep nutstore | grep -v grep
+        ps aux | grep xvfb | grep -v grep
+        ;;
+    kill)
+        # 杀死所有 nutstore-pydaemon.py 的进程
+        pkill -f nutstore
+        pkill -f xvfb
+        echo "已杀死 Nutstore 守护进程。"
+        ;;
+    "")
+        # 如果没有提供参数，直接执行命令
+        sh -c "exec ~/.nutstore/dist/bin/nutstore-pydaemon.py"
+        ;;
+    *)
+        # 对于其他任何参数，不执行任何操作
+        echo "未知参数: $1"
+        echo "可用参数: -d, log, ps, kill"
+        ;;
+esac

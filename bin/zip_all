@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Usage: zip_all [--exclude "<exclude_pattern>"]
+
+# 初始化排除模式变量
+exclude_pattern=""
+
+# 读取命令行参数
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --exclude) # 获取排除模式的正则表达式
+            exclude_pattern="$2"
+            shift # 跳过排除模式的值
+            ;;
+    esac
+    shift # 跳过参数名或上一个参数的值
+done
+
+# 遍历当前目录下的所有文件夹
+for folder in */; do
+    foldername="${folder%/}" # 移除路径的最后一个'/'
+    # 如果设置了排除模式，并且文件夹名称匹配该正则表达式，则跳过
+    if [[ ! -z "$exclude_pattern" ]] && [[ $foldername =~ $exclude_pattern ]]; then
+        echo "跳过 ${foldername}..."
+        continue # 跳过此次循环的剩余部分
+    fi
+    # 使用文件夹名称打包为zip格式
+    zip -r "${foldername}.zip" "$foldername"
+done
+
+echo "所有未排除的文件夹已成功打包为zip格式。"
