@@ -83,25 +83,26 @@ brew install yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide
 
 ```bash
 # yazi amd64
+mkdir -p ~/dl
 cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-x86_64-unknown-linux-gnu.zip
 unzip yazi-x86_64-unknown-linux-gnu.zip
-cp yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
+cp yazi-x86_64-unknown-linux-gnu/yazi ~/.local/bin/
 
 # yazi aarch64
-cargo install --locked yazi-fm
-# cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-aarch64-unknown-linux-gnu.zip
-# unzip yazi-aarch64-unknown-linux-gnu.zip
-# cp yazi-aarch64-unknown-linux-gnu/yazi /usr/local/bin/
-# TODO: `yazi: /lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.33' not found (required by yazi)`
+# cargo install --locked yazi-fm
+# # cd ~/dl && wget https://github.com/sxyazi/yazi/releases/download/v0.2.3/yazi-aarch64-unknown-linux-gnu.zip
+# # unzip yazi-aarch64-unknown-linux-gnu.zip
+# # cp yazi-aarch64-unknown-linux-gnu/yazi ~/.local/bin/
+# # TODO: `yazi: /lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.33' not found (required by yazi)`
 
 # requirtments
-sudo apt update && sudo apt install -y file unar jq fd-find ripgrep fzf zoxide
+sudo apt update && sudo apt install -y file unar jq fd-find ripgrep fzf
 
-# TODO: ubuntu20.04 has no zoxide
+# sudo apt install -y zoxide, recommend using binary
 curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
 
 # no necessary
-sudo apt install -y ffmpegthumbnailer poppler-utils
+# sudo apt install -y ffmpegthumbnailer poppler-utils
 ```
 
 </details>
@@ -128,17 +129,17 @@ pip install pynvim
 ```bash
 # nvim amd64
 sudo apt install libfuse2
-wget https://github.com/neovim/neovim/releases/download/stable/nvim.appimage -O /usr/local/bin/nvim.appimage
-chmod +x /usr/local/bin/nvim.appimage && ln -sf /usr/local/bin/nvim.appimage /usr/local/bin/nvim
+wget https://github.com/neovim/neovim/releases/download/stable/nvim.appimage -O ~/.local/bin/nvim.appimage
+chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim
 
 # nvim aarch64
-# git clone https://github.com/neovim/neovim.git
-cd ~/dl/neovim
-git tag -d stable && git pull
-git checkout stable
-rm -r build/
-make CMAKE_BUILD_TYPE=Release
-sudo make install
+# # git clone https://github.com/neovim/neovim.git
+# cd ~/dl/neovim
+# git tag -d stable && git pull
+# git checkout stable
+# rm -r build/
+# make CMAKE_BUILD_TYPE=Release
+# sudo make install
 
 # requirements
 sudo apt update && sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip
@@ -183,7 +184,7 @@ curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/lates
 # curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_arm64.tar.gz"
 
 tar xf lazygit.tar.gz lazygit
-sudo install lazygit /usr/local/bin
+sudo install lazygit ~/.local/bin
 ```
 
 </details>
@@ -220,6 +221,7 @@ tmux -V
 ### 1️⃣ Download Config
 
 ```bash
+mkdir -p ~/.config
 cd ~/.config
 git init && git branch -M main
 git remote add origin https://github.com/uxfion/.config.git
