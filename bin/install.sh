@@ -97,9 +97,8 @@ download_yazi_binary() {
     _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
 
     fetch "$_package_url" > "$tdir/yazi.zip" || die "failed to download: $_package_url"
-    unzip -j -d "$tdir/yazi/" "$tdir/yazi.zip"
+    unzip -j -d "$tdir/yazi/" "$tdir/yazi.zip" > /dev/null 2>&1
     cp "$tdir/yazi/yazi" ~/.local/bin/yazi
-    log "yazi installed to ~/.local/bin/yazi"
 }
 
 install_yazi_by_apt() {
@@ -107,6 +106,13 @@ install_yazi_by_apt() {
     if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then
         log "installing yazi $arch binary"
         download_yazi_binary "$arch"
+        log "yazi installed to ~/.local/bin/yazi"
+        log "installing yazi dependencies"
+        sudo apt update > /dev/null 2>&1 && sudo apt install -y file unar jq fd-find ripgrep fzf ffmpegthumbnailer poppler-utils > /dev/null 2>&1 || die "failed to install dependencies"
+        log "yazi and dependencies installed"
+        log "installing zoxide"
+        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+        log "zoxide installed to ~/.local/bin/zoxide"
         log "yazi and dependencies installed"
     else
         die "unknown CPU architecture $arch"
