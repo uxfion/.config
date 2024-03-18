@@ -268,6 +268,7 @@ config() {
         REMOTE_URL=$(git remote get-url origin)
         if [ "$REMOTE_URL" = "$GIT_REPO" ] || [ "$REMOTE_URL" = "$GIT_REPO_SSH" ]; then
                 log "remote repo already set, pulling"
+                git reset --hard HEAD
                 git pull
         else
             die "remote repo does not match, exiting"
