@@ -81,7 +81,7 @@ install_yazi_by_brew() {
     for package in "${packages[@]}"; do
         log "installing $package"
         for attempt in {1..2}; do
-            if brew install "$package" > /dev/null 2>&1; then
+            if brew install "$package"; then
                 break
             elif [ "$attempt" -eq 2 ]; then
                 die "failed to install $package after 2 attempts"
@@ -100,7 +100,7 @@ download_yazi_binary() {
     _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
 
     fetch "$_package_url" > "$tdir/yazi.zip" || die "failed to download: $_package_url"
-    unzip -j -d "$tdir/yazi/" "$tdir/yazi.zip" > /dev/null 2>&1
+    unzip -j -d "$tdir/yazi/" "$tdir/yazi.zip"
     cp "$tdir/yazi/yazi" ~/.local/bin/yazi
 }
 
@@ -111,8 +111,8 @@ install_yazi_by_apt() {
         download_yazi_binary "$arch"
         log "yazi installed to ~/.local/bin/yazi"
         log "installing yazi dependencies"
-        sudo apt update > /dev/null 2>&1
-        sudo apt install -y file unar jq fd-find ripgrep fzf ffmpegthumbnailer poppler-utils > /dev/null 2>&1 || die "failed to install dependencies"
+        sudo apt update
+        sudo apt install -y file unar jq fd-find ripgrep fzf ffmpegthumbnailer poppler-utils || die "failed to install dependencies"
         log "installing zoxide"
         curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
         log "zoxide installed to ~/.local/bin/zoxide"
@@ -126,15 +126,15 @@ install_yazi_by_apt() {
 # -------------------------- nvim --------------------------
 install_nvim_by_brew() {
     log "installing nvim by brew"
-    brew install nvim rustup fd ripgrep > /dev/null 2>&1 || die "failed to install nvim and dependencies"
-    brew install node@20 > /dev/null 2>&1 && brew link --overwrite node@20 > /dev/null 2>&1 || die "failed to install node@20"
-    npm install -g neovim > /dev/null 2>&1 || die "failed to install npm neovim"
-    pip install pynvim > /dev/null 2>&1 || die "failed to install pynvim"
+    brew install nvim rustup fd ripgrep || die "failed to install nvim and dependencies"
+    brew install node@20 && brew link --overwrite node@20 || die "failed to install node@20"
+    npm install -g neovim || die "failed to install npm neovim"
+    pip install pynvim || die "failed to install pynvim"
     log "nvim and dependencies installed"
 }
 
 download_nvim_binary() {
-    sudo apt install libfuse2 > /dev/null 2>&1 || die "failed to install libfuse2"
+    sudo apt install libfuse2 || die "failed to install libfuse2"
     fetch https://github.com/neovim/neovim/releases/download/stable/nvim.appimage > ~/.local/bin/nvim.appimage || die "failed to download nvim"
     chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim
 }
@@ -146,6 +146,7 @@ install_nvim_by_apt() {
         download_nvim_binary
         log "nvim installed to ~/.local/bin/nvim"
     elif [ "$arch" = "aarch64" ]; then
+        # https://github.com/matsuu/neovim-aarch64-appimage
         log "installing nvim from source"
         read -t 10 -p "Do you want to install nvim from source? [y/N] " choice
         # 如果用户没有输入，read命令的返回状态会是大于128的。使用该特性来检测超时
@@ -156,8 +157,8 @@ install_nvim_by_apt() {
         case "$choice" in
             y|Y)
                 log "installing nvim from source"
-                sudo apt update > /dev/null 2>&1
-                sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip > /dev/null 2>&1 || die "failed to install dependencies"
+                sudo apt update
+                sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip || die "failed to install dependencies"
                 git clone -b stable https://github.com/neovim/neovim.git "$tdir/neovim" || die "failed to clone neovim"
                 cd "$tdir/neovim"
                 make CMAKE_BUILD_TYPE=Release || die "failed to build nvim"
@@ -172,13 +173,13 @@ install_nvim_by_apt() {
         die "unknown CPU architecture $arch"
     fi
     log "installing nvim dependencies"
-    sudo apt update > /dev/null 2>&1
-    sudo apt install -y fd-find ripgrep > /dev/null 2>&1 || die "failed to install dependencies"
+    sudo apt update
+    sudo apt install -y fd-find ripgrep || die "failed to install dependencies"
     # node
-    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - > /dev/null 2>&1 || die "failed to ssetup nodejs repository"
-    sudo apt-get install -y nodejs > /dev/null 2>&1 || die "failed to install nodejs"
-    npm install -g neovim > /dev/null 2>&1 || die "failed to install npm neovim"
-    pip install pynvim > /dev/null 2>&1 || die "failed to install pynvim"
+    curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash - || die "failed to ssetup nodejs repository"
+    sudo apt-get install -y nodejs || die "failed to install nodejs"
+    npm install -g neovim || die "failed to install npm neovim"
+    pip install pynvim || die "failed to install pynvim"
     log "nvim and dependencies installed"
 }
 # ----------------------------------------------------------
@@ -186,7 +187,7 @@ install_nvim_by_apt() {
 # -------------------------- lazygit --------------------------
 install_lazygit_by_brew() {
     log "installing lazygit by brew"
-    brew install lazygit > /dev/null 2>&1 || die "failed to install lazygit"
+    brew install lazygit || die "failed to install lazygit"
     log "lazygit installed"
 }
 
@@ -211,14 +212,14 @@ install_lazygit_by_apt() {
 # -------------------------- tmux --------------------------
 install_tmux_by_brew() {
     log "installing tmux by brew"
-    brew install tmux > /dev/null 2>&1 || die "failed to install tmux"
+    brew install tmux || die "failed to install tmux"
     log "tmux installed"
 }
 
 install_tmux_by_apt() {
     log "installing tmux by apt"
-    sudo apt update > /dev/null 2>&1
-    sudo apt install -y tmux > /dev/null 2>&1 || die "failed to install tmux"
+    sudo apt update
+    sudo apt install -y tmux || die "failed to install tmux"
     log "tmux installed"
 }
 # ----------------------------------------------------------
