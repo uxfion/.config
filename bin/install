@@ -126,8 +126,8 @@ install_yazi_by_apt() {
 # -------------------------- nvim --------------------------
 install_nvim_by_brew() {
     log "installing nvim by brew"
-    brew install nvim rustup fd ripgrep || die "failed to install nvim and dependencies"
-    brew install node@20 && brew link --overwrite node@20 || die "failed to install node@20"
+    brew install nvim rustup fd ripgrep 2> /dev/null > /dev/null || die "failed to install nvim and dependencies"
+    brew install node@20 && brew link --overwrite node@20 2> /dev/null > /dev/null || die "failed to install node@20"
     npm install -g neovim > /dev/null 2>&1 || die "failed to install npm neovim"
     pip install pynvim > /dev/null 2>&1 || die "failed to install pynvim"
     log "nvim and dependencies installed"
@@ -226,6 +226,7 @@ install_tmux_by_apt() {
 config() {
     # 设置目标 git 仓库地址
     GIT_REPO="https://github.com/uxfion/.config.git"
+    GIT_REPO_SSH="https://github.com/uxfion/.config.git"
     CONFIG_DIR="$HOME/.config"
 
     # 检查 ~/.config 目录是否存在
@@ -246,7 +247,7 @@ config() {
     else
         # 检查设置的远程仓库是否正确
         REMOTE_URL=$(git remote get-url origin)
-        if [ "$REMOTE_URL" = "$GIT_REPO" ]; then
+        if [ "$REMOTE_URL" = "$GIT_REPO" ] || [ "$REMOTE_URL" = "$GIT_REPO_SSH" ]; then
                 log "remote repo already set, pulling"
                 git pull
         else
