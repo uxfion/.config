@@ -19,14 +19,14 @@ log() {
 }
 
 detect_network_tool() {
-    if command -v curl 2> /dev/null > /dev/null; then
+    if command -v curl > /dev/null 2>&1; then
         fetch() {
             command curl -fL "$1"
         }
         fetch_quiet() {
             command curl -fsSL "$1"
         }
-    elif command -v wget 2> /dev/null > /dev/null; then
+    elif command -v wget > /dev/null 2>&1; then
         fetch() {
             command wget -O- "$1"
         }
@@ -59,7 +59,7 @@ detect_os() {
 }
 
 detect_brew() {
-    if command -v brew 2> /dev/null > /dev/null; then
+    if command -v brew > /dev/null 2>&1; then
         brew_installed=true
     else
         brew_installed=false
@@ -67,7 +67,7 @@ detect_brew() {
 }
 
 detect_apt() {
-    if command -v apt 2> /dev/null > /dev/null; then
+    if command -v apt > /dev/null 2>&1; then
         apt_installed=true
     else
         apt_installed=false
@@ -81,7 +81,7 @@ install_yazi_by_brew() {
     for package in "${packages[@]}"; do
         log "installing $package"
         for attempt in {1..2}; do
-            if brew install "$package" 2> /dev/null > /dev/null; then
+            if brew install "$package" > /dev/null 2>&1; then
                 break
             elif [ "$attempt" -eq 2 ]; then
                 die "failed to install $package after 2 attempts"
@@ -126,8 +126,8 @@ install_yazi_by_apt() {
 # -------------------------- nvim --------------------------
 install_nvim_by_brew() {
     log "installing nvim by brew"
-    brew install nvim rustup fd ripgrep 2> /dev/null > /dev/null || die "failed to install nvim and dependencies"
-    brew install node@20 && brew link --overwrite node@20 2> /dev/null > /dev/null || die "failed to install node@20"
+    brew install nvim rustup fd ripgrep > /dev/null 2>&1 || die "failed to install nvim and dependencies"
+    brew install node@20 > /dev/null 2>&1 && brew link --overwrite node@20 > /dev/null 2>&1 || die "failed to install node@20"
     npm install -g neovim > /dev/null 2>&1 || die "failed to install npm neovim"
     pip install pynvim > /dev/null 2>&1 || die "failed to install pynvim"
     log "nvim and dependencies installed"
