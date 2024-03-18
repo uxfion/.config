@@ -271,8 +271,8 @@ then `source ~/.config/myrc.sh`
 
 ```
 # for bash
-curl -L https://github.com/uxfion/.config/raw/main/bin/install | bash
+curl -L https://github.com/uxfion/.config/raw/main/bin/install.sh | bash
 
 # for zsh
-curl -L https://github.com/uxfion/.config/raw/main/bin/install | zsh
+curl -L https://github.com/uxfion/.config/raw/main/bin/install.sh | zsh
 ```

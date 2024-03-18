@@ -147,10 +147,10 @@ install_nvim_by_apt() {
         log "nvim installed to ~/.local/bin/nvim"
     elif [ "$arch" = "aarch64" ]; then
         log "installing nvim from source"
-        read -t 5 -p "Do you want to install nvim from source? [y/N] " choice
+        read -t 10 -p "Do you want to install nvim from source? [y/N] " choice
         # 如果用户没有输入，read命令的返回状态会是大于128的。使用该特性来检测超时
         if [ $? -eq 142 ]; then
-            echo "超时了。默认选择不安装。"
+            log "timeout, nvim is not installed"
             choice=1
         fi
         case "$choice" in
@@ -160,8 +160,8 @@ install_nvim_by_apt() {
                 sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip > /dev/null 2>&1 || die "failed to install dependencies"
                 git clone -b stable https://github.com/neovim/neovim.git "$tdir/neovim" || die "failed to clone neovim"
                 cd "$tdir/neovim"
-                make CMAKE_BUILD_TYPE=Release > /dev/null 2>&1 || die "failed to build nvim"
-                sudo make install > /dev/null 2>&1 || die "failed to install nvim"
+                make CMAKE_BUILD_TYPE=Release || die "failed to build nvim"
+                sudo make install || die "failed to install nvim"
                 log "nvim installed to /usr/local/bin/nvim"
                 ;;
             *)
@@ -198,7 +198,7 @@ install_lazygit_by_apt() {
         tar -xzf "$tdir/lazygit.tar.gz" -C "$tdir" lazygit
         sudo install "$tdir/lazygit" ~/.local/bin
     elif [ "$arch" = "aarch64" ]; then
-        curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_arm64.tar.gz" || die "failed to download lazygit"
+        curl -Lo "$tdir/lazygit.tar.gz" "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_arm64.tar.gz" || die "failed to download lazygit"
         tar -xzf "$tdir/lazygit.tar.gz" -C "$tdir" lazygit
         sudo install "$tdir/lazygit" ~/.local/bin
     else
