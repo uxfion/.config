@@ -266,3 +266,13 @@ cd ~/.config && git pull
 
 then `source ~/.config/myrc.sh`
 
+
+## 🌌 Ultimate
+
+```
+# for bash
+curl -L https://github.com/uxfion/.config/raw/main/bin/install | bash
+
+# for zsh
+curl -L https://github.com/uxfion/.config/raw/main/bin/install | zsh
+```

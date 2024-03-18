@@ -274,15 +274,8 @@ rc() {
         log "added myrc.sh to $CONFIG_FILE"
     fi
 
-    if [ "$SHELL" = "/bin/bash" ]; then
-        source "$CONFIG_FILE"
-        log "sourced $CONFIG_FILE"
-    elif [ "$SHELL" = "/bin/zsh" ]; then
-        log "please source $CONFIG_FILE manually"
-        log "source $CONFIG_FILE"
-    else
-        die "unsupported shell type: $SHELL"
-    fi
+    source "$CONFIG_FILE"
+    log "sourced $CONFIG_FILE"
 }
 
 main() {
