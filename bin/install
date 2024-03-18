@@ -34,7 +34,7 @@ detect_network_tool() {
             command wget --quiet -O- "$1"
         }
     else
-        die "Neither curl nor wget available, cannot download"
+        die "neither curl nor wget available, cannot download"
     fi
 }
 
@@ -51,7 +51,7 @@ detect_os() {
                 armv8*) arch="aarch64";;
                 i386) arch="i686";;
                 i686) arch="i686";;
-                *) die "Unknown CPU architecture $(command uname -m)";;
+                *) die "unknown CPU architecture $(command uname -m)";;
             esac
             ;;
         *) die "binaries are not available for $(command uname)"
