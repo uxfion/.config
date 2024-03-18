@@ -292,9 +292,6 @@ rc() {
         echo -e "$LINE_TO_ADD" >> "$CONFIG_FILE"
         log "added myrc.sh to $CONFIG_FILE"
     fi
-
-    source "$CONFIG_FILE"
-    log "sourced $CONFIG_FILE"
 }
 
 main() {
@@ -346,6 +343,8 @@ main() {
     log "------- cleaning -------"
     cleanup
     log "done!"
+    log "please run the following command to apply the changes:"
+    log "source $CONFIG_FILE"
 }
 
 main "$@"
