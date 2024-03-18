@@ -151,7 +151,7 @@ install_nvim_by_apt() {
         # 如果用户没有输入，read命令的返回状态会是大于128的。使用该特性来检测超时
         if [ $? -eq 142 ]; then
             log "timeout, nvim is not installed"
-            choice=1
+            choice="n"
         fi
         case "$choice" in
             y|Y)
