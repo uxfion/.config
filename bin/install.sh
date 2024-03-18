@@ -97,7 +97,17 @@ download_yazi_binary() {
     local _releases_url="https://api.github.com/repos/sxyazi/yazi/releases/latest"
     local _releases
     _releases=$(fetch_quiet "$_releases_url")
-    _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
+    # _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
+
+    glibc_version=$(ldd --version | head -n1 | grep -oP '(\d+\.\d+)' | head -1)
+    if [[ $(echo "$glibc_version < 2.32" | bc) -eq 1 ]]; then
+        # glibc版本小于2.32
+        log "glibc version is less than 2.32, using musl version of yazi for compatibility"
+        _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-musl.zip")"
+    else
+        # glibc版本等于或高于2.32
+        _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
+    fi
 
     fetch "$_package_url" > "$tdir/yazi.zip" || die "failed to download: $_package_url"
     unzip -j -d "$tdir/yazi/" "$tdir/yazi.zip"
