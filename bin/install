@@ -186,7 +186,7 @@ install_nvim_by_apt() {
 # -------------------------- lazygit --------------------------
 install_lazygit_by_brew() {
     log "installing lazygit by brew"
-    brew install lazygit || die "failed to install lazygit"
+    brew install lazygit > /dev/null 2>&1 || die "failed to install lazygit"
     log "lazygit installed"
 }
 
@@ -211,7 +211,7 @@ install_lazygit_by_apt() {
 # -------------------------- tmux --------------------------
 install_tmux_by_brew() {
     log "installing tmux by brew"
-    brew install tmux || die "failed to install tmux"
+    brew install tmux > /dev/null 2>&1 || die "failed to install tmux"
     log "tmux installed"
 }
 
@@ -226,7 +226,7 @@ install_tmux_by_apt() {
 config() {
     # 设置目标 git 仓库地址
     GIT_REPO="https://github.com/uxfion/.config.git"
-    GIT_REPO_SSH="https://github.com/uxfion/.config.git"
+    GIT_REPO_SSH="git@github.com:uxfion/.config.git"
     CONFIG_DIR="$HOME/.config"
 
     # 检查 ~/.config 目录是否存在
