@@ -257,9 +257,11 @@ config() {
     # 检查当前目录是否是一个 git 仓库
     if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
         log "init git repo in $CONFIG_DIR"
-        git init && git branch -M main
+        git init
         git remote add origin "$GIT_REPO"
+        git fetch origin main:main
         git branch -u origin/main main
+        git switch main
         git pull
     else
         # 检查设置的远程仓库是否正确
