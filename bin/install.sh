@@ -237,7 +237,7 @@ install_tmux_by_apt() {
 apt_prepare() {
     log "requirements before installation"
     sudo apt update
-    sudo apt install -y git build-essential curl python3-pip unzip || die "failed to install dependencies"
+    sudo apt install -y git build-essential curl python3-pip unzip bc || die "failed to install dependencies"
 }
 
 config() {
