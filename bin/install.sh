@@ -234,6 +234,12 @@ install_tmux_by_apt() {
 }
 # ----------------------------------------------------------
 
+apt_prepare() {
+    log "requirements before installation"
+    sudo apt update
+    sudo apt install -y git build-essential curl python3-pip unzip || die "failed to install dependencies"
+}
+
 config() {
     # 设置目标 git 仓库地址
     GIT_REPO="https://github.com/uxfion/.config.git"
@@ -323,6 +329,7 @@ main() {
             install_tmux_by_brew
         elif [ "$apt_installed" = true ]; then
             log "using apt and binaries to install"
+            apt_prepare
             install_yazi_by_apt
             install_nvim_by_apt
             install_lazygit_by_apt
