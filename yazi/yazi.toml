@@ -11,7 +11,7 @@ max_height = 2000
 
 [opener]
 edit = [
-    { run = '${EDITOR:=vi} "$@"', desc = "$EDITOR", block = true, for = "unix" },
-    { run = 'code "$@"', desc = 'VS Code', orphan = true, for = 'unix' },
-    { run = 'code "%*"', desc = 'VS Code', orphan = true, for = "windows" },
+    { exec = '${EDITOR:=vi} "$@"', desc = "$EDITOR", block = true, for = "unix" },
+    { exec = 'code "$@"', desc = 'VS Code', orphan = true, for = 'unix' },
+    { exec = 'code "%*"', desc = 'VS Code', orphan = true, for = "windows" },
 ]
