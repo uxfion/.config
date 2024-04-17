@@ -50,3 +50,13 @@ down() {
 up() {
     kitten transfer --direction=upload "$@" ./
 }
+
+function op() {
+    local input="$1"
+    IFS=',' read -ra tags <<< "$input"
+    for tag in "${tags[@]}"; do
+        echo -e "\033[1;4;36mollama pull $tag\033[0m"
+        ollama pull "$tag"
+    done
+}
+
