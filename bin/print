@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# print_color function to print text in specified color, bold and underlined
+print_color() {
+    # Display help if -h is the first argument
+    if [[ "$1" == "-h" ]]; then
+        echo "Usage: print_color [-c COLOR] TEXT"
+        echo "Options:"
+        echo "  -c COLOR  Specify the color of the text. Available colors:"
+        echo "            black, red, green, yellow, blue, purple, cyan, white"
+        echo "  -h        Display this help message."
+        echo "If no '-c' option is provided, default to white color, bold and underlined."
+        return
+    fi
+
+    # Default color code for white, bold and underlined
+    local color_code="1;4;37"
+
+    # Check for -c option and process it
+    if [[ "$1" == "-c" ]] && [ -n "$2" ]; then
+        # Adjust color code based on specified color
+        case "$2" in
+            black) color_code="1;4;30" ;;
+            red) color_code="1;4;31" ;;
+            green) color_code="1;4;32" ;;
+            yellow) color_code="1;4;33" ;;
+            blue) color_code="1;4;34" ;;
+            purple) color_code="1;4;35" ;;
+            cyan) color_code="1;4;36" ;;
+            white) color_code="1;4;37" ;;
+            *)
+                echo "Unsupported color: $2"
+                return
+                ;;
+        esac
+        shift 2  # Shift past the option and color to the rest of the arguments
+    fi
+
+    # Print the remaining text with the chosen formatting
+    echo -e "\e[${color_code}m$@\e[0m"
+}
+
+# If script is sourced, do nothing, only define function
+# If script is run directly, call print_color with all command line arguments
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    print_color "$@"
+fi
+
