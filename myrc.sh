@@ -9,13 +9,14 @@ fi
 
 # alias cd='z'
 
-alias dt='docker run -it --rm'
 alias dc='docker compose'
 alias dr='dc down && dc pull && dc build && dc up -d'
 alias dd='dc down'
 alias dl='dc logs -f'
 alias dp='docker ps -a'
 alias dpp='docker system prune -a'
+alias de='docker exec -it'
+alias dt='docker run -it --rm'
 
 alias r='ya'
 function ya() {
