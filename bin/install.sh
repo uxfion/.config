@@ -114,8 +114,8 @@ download_yazi_binary() {
     cp "$tdir/yazi/yazi" ~/.local/bin/yazi
 }
 
-install_yazi_by_apt() {
-    log "installing yazi and dependencies by apt"
+install_yazi_by_binary() {
+    log "installing yazi and dependencies by binary"
     if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then
         log "installing yazi $arch binary"
         download_yazi_binary "$arch"
@@ -143,45 +143,32 @@ install_nvim_by_brew() {
     log "nvim and dependencies installed"
 }
 
-download_nvim_binary() {
+download_nvim_x64_binary() {
     sudo apt install libfuse2 || die "failed to install libfuse2"
     fetch https://github.com/neovim/neovim/releases/download/stable/nvim.appimage > ~/.local/bin/nvim.appimage || die "failed to download nvim"
     chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim
 }
 
-install_nvim_by_apt() {
-    log "installing nvim and dependencies by apt"
+download_nvim_aarch64_binary() {
+    sudo apt install libfuse2 || die "failed to install libfuse2"
+    local _releases_url="https://api.github.com/repos/matsuu/neovim-aarch64-appimage/releases/latest"
+    local _releases=$(fetch_quiet "$_releases_url")
+    local _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "aarch64.appimage")"
+    fetch _package_url > ~/.local/bin/nvim.appimage || die "failed to download nvim"
+    chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim
+}
+
+install_nvim_by_binary() {
+    log "installing nvim and dependencies by binary"
+    log "installing nvim $arch appimage"
     if [ "$arch" = "x86_64" ]; then
-        log "installing nvim $arch appimage"
-        download_nvim_binary
-        log "nvim installed to ~/.local/bin/nvim"
+        download_nvim_x64_binary
     elif [ "$arch" = "aarch64" ]; then
-        # https://github.com/matsuu/neovim-aarch64-appimage
-        log "installing nvim from source"
-        read -t 10 -p "Do you want to install nvim from source? [y/N] " choice
-        # 如果用户没有输入，read命令的返回状态会是大于128的。使用该特性来检测超时
-        if [ $? -eq 142 ]; then
-            log "timeout, nvim is not installed"
-            choice="n"
-        fi
-        case "$choice" in
-            y|Y)
-                log "installing nvim from source"
-                sudo apt update
-                sudo apt install -y git build-essential ca-certificates curl gnupg python3-pip || die "failed to install dependencies"
-                git clone -b stable https://github.com/neovim/neovim.git "$tdir/neovim" || die "failed to clone neovim"
-                cd "$tdir/neovim"
-                make CMAKE_BUILD_TYPE=Release || die "failed to build nvim"
-                sudo make install || die "failed to install nvim"
-                log "nvim installed to /usr/local/bin/nvim"
-                ;;
-            *)
-                log "nvim is not installed"
-                ;;
-        esac
+        download_nvim_aarch64_binary
     else
         die "unknown CPU architecture $arch"
     fi
+    log "nvim installed to ~/.local/bin/nvim"
     log "installing nvim dependencies"
     sudo apt update
     sudo apt install -y fd-find ripgrep || die "failed to install dependencies"
@@ -201,7 +188,7 @@ install_lazygit_by_brew() {
     log "lazygit installed"
 }
 
-install_lazygit_by_apt() {
+install_lazygit_by_binary() {
     log "installing lazygit by binary"
     LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
     if [ "$arch" = "x86_64" ]; then
@@ -243,7 +230,7 @@ install_starship_by_brew() {
 }
 install_starship_by_binary() {
     log "installing starship by binary"
-    curl -fsSL https://starship.rs/install.sh | bash -s -- -y || die "failed to install starship"
+    curl -fsSL https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y || die "failed to install starship"
     log "starship installed"
 }
 # ----------------------------------------------------------
@@ -347,9 +334,9 @@ main() {
         elif [ "$apt_installed" = true ]; then
             log "using apt and binaries to install"
             apt_prepare
-            install_yazi_by_apt
-            install_nvim_by_apt
-            install_lazygit_by_apt
+            install_yazi_by_binary
+            install_nvim_by_binary
+            install_lazygit_by_binary
             install_tmux_by_apt
             install_starship_by_binary
         else
