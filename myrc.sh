@@ -2,9 +2,11 @@ export PATH=~/.local/bin:$PATH
 export PATH=~/.config/bin:$PATH
 
 if [[ $SHELL == */bash ]]; then
+    eval "$(fzf --bash)"
     eval "$(zoxide init bash)"
     eval "$(starship init bash)"
 elif [[ $SHELL == */zsh ]]; then
+    eval "$(fzf --zsh)"
     eval "$(zoxide init zsh)"
     eval "$(starship init zsh)"
 fi
