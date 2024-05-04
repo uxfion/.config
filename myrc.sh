@@ -3,8 +3,10 @@ export PATH=~/.config/bin:$PATH
 
 if [[ $SHELL == */bash ]]; then
     eval "$(zoxide init bash)"
+    eval "$(starship init bash)"
 elif [[ $SHELL == */zsh ]]; then
     eval "$(zoxide init zsh)"
+    eval "$(starship init zsh)"
 fi
 
 # alias cd='z'

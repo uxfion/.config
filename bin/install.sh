@@ -10,12 +10,12 @@ cleanup() {
 
 die() {
     cleanup
-    printf "\033[31m%s\033[m\n\r" "$*" > /dev/stderr;
+    printf "\033[1;31;4m%s\033[0m\n\r" "$*" > /dev/stderr;
     exit 1;
 }
 
 log() {
-    printf "\033[32m%s\033[m\n\r" "$*" > /dev/stderr;
+    printf "\033[1;36;4m%s\033[0m\n\r" "$*" > /dev/stderr;
 }
 
 detect_network_tool() {
@@ -234,6 +234,20 @@ install_tmux_by_apt() {
 }
 # ----------------------------------------------------------
 
+
+# -------------------------- tmux --------------------------
+install_starship_by_brew() {
+    log "installing starship by brew"
+    brew install starship || die "failed to install starship"
+    log "starship installed"
+}
+install_starship_by_binary() {
+    log "installing starship by binary"
+    curl -fsSL https://starship.rs/install.sh | bash -s -- -y || die "failed to install starship"
+    log "starship installed"
+}
+# ----------------------------------------------------------
+
 apt_prepare() {
     log "requirements before installation"
     sudo apt update
@@ -318,6 +332,7 @@ main() {
             install_nvim_by_brew
             install_lazygit_by_brew
             install_tmux_by_brew
+            install_starship_by_brew
         else
             die "brew is not installed"
         fi
@@ -328,6 +343,7 @@ main() {
             install_nvim_by_brew
             install_lazygit_by_brew
             install_tmux_by_brew
+            install_starship_by_brew
         elif [ "$apt_installed" = true ]; then
             log "using apt and binaries to install"
             apt_prepare
@@ -335,6 +351,7 @@ main() {
             install_nvim_by_apt
             install_lazygit_by_apt
             install_tmux_by_apt
+            install_starship_by_binary
         else
             die "brew and apt are not installed"
         fi
