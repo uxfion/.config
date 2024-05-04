@@ -154,7 +154,7 @@ download_nvim_aarch64_binary() {
     local _releases_url="https://api.github.com/repos/matsuu/neovim-aarch64-appimage/releases/latest"
     local _releases=$(fetch_quiet "$_releases_url")
     local _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "aarch64.appimage")"
-    fetch _package_url > ~/.local/bin/nvim.appimage || die "failed to download nvim"
+    fetch $_package_url > ~/.local/bin/nvim.appimage || die "failed to download nvim"
     chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim
 }
 
