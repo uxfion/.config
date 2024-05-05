@@ -5,6 +5,11 @@
 #         Copyright 2012— Gregory Pakosz (@gpakosz).
 
 
+# yazi image preview
+set -g allow-passthrough on
+set -ga update-environment TERM
+set -ga update-environment TERM_PROGRAM
+
 # -- bindings ------------------------------------------------------------------
 
 # preserve tmux stock bindings,
