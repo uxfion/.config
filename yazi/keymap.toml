@@ -1,0 +1,10 @@
+
+on  = [ "T" ]
+run = "plugin --sync max-preview"
+
+[manager]
+prepend_keymap = [
+    { on = [ "T" ], run = "plugin --sync max-preview" },
+	{ on = [ "<C-s>" ], run = 'shell "$SHELL" --block --confirm', desc = "shell" },
+	{ on = [ "<C-g>" ], run = 'shell lazygit --block --confirm', desc = "lazygit" },
+]
