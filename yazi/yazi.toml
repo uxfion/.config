@@ -6,8 +6,8 @@ linemode = "size"
 
 [preview]
 tab_size = 4
-max_width = 1000
-max_height = 1000
+max_width = 1280
+max_height = 1280
 
 [opener]
 edit = [

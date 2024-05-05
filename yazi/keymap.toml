@@ -1,7 +1,3 @@
-
-on  = [ "T" ]
-run = "plugin --sync max-preview"
-
 [manager]
 prepend_keymap = [
     { on = [ "T" ], run = "plugin --sync max-preview" },
