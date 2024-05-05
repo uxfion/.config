@@ -9,8 +9,6 @@ elif [[ $SHELL == */zsh ]]; then
     eval "$(starship init zsh)"
 fi
 
-# alias cd='z'
-
 alias dc='docker compose'
 alias dr='dc down && dc pull && dc build && dc up -d'
 alias dd='dc down'
@@ -58,8 +56,14 @@ op() {
     local input="$1"
     IFS=',' read -ra tags <<< "$input"
     for tag in "${tags[@]}"; do
-        echo -e "\033[1;4;36mollama pull $tag\033[0m"
+        # echo -e "\033[1;4;36mollama pull $tag\033[0m"
+        print -c cyan "ollama pull $tag"
         ollama pull "$tag"
     done
+}
+
+wez() {
+    print -c cyan "export TERM_PROGRAM=WezTerm"
+    export TERM_PROGRAM=WezTerm
 }
 
