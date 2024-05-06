@@ -1,41 +1,71 @@
 local wezterm = require 'wezterm'
 
-local c = {}
+local config = {}
 if wezterm.config_builder then
-    c = wezterm.config_builder()
-  end
+    config = wezterm.config_builder()
+end
 
--- 初始大小
-c.initial_cols = 100
-c.initial_rows = 30
+config.initial_cols = 100
+config.initial_rows = 30
+config.font_size = 12
+config.font = wezterm.font("JetBrainsMono Nerd Font")
 
--- 关闭时不进行确认
-c.window_close_confirmation = 'NeverPrompt'
+config.color_scheme = "Dracula"
+config.window_background_opacity = 0.95
 
-c.font_size = 12
-c.font = wezterm.font("JetBrainsMono Nerd Font")
+config.window_decorations = "RESIZE"
+config.use_fancy_tab_bar = true
 
-c.color_scheme = "Dracula"
-
--- 透明背景
-c.window_background_opacity = 0.95
-
-c.use_fancy_tab_bar = true
+config.window_close_confirmation = 'NeverPrompt'
 
 
-c.default_prog = { 'pwsh' }
-c.default_cwd = "D:\\Lecter"
--- c.default_domain = 'WSL:Ubuntu'
+config.default_prog = { 'pwsh' }
+config.default_cwd = "D:\\Lecter"
+-- config.default_domain = 'SSH:hx90'
 
--- 启动菜单的一些启动项
-c.launch_menu = {
-  { label = 'PowerShell', args = { 'pwsh' }, },
-  { label = 'Ubuntu', args = { 'ubuntu' }, },
-
---   { label = 'nas / ssh',       args = { 'C:/msys64/usr/bin/ssh.exe', 'nas' }, },
---   { label = 'MINGW64 / MSYS2', args = { 'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-start', '-shell', 'zsh', '-mingw64' }, },
---   { label = 'MSYS / MSYS2',    args = { 'C:/msys64/msys2_shell.cmd', '-defterm', '-here', '-no-start', '-shell', 'zsh', '-msys' }, },
+config.launch_menu = {
+    { label = 'PowerShell', args = { 'pwsh' }, },
+    { label = 'Ubuntu', args = { 'ubuntu' }, },
+    { label = 'HX90', domain = { DomainName = 'SSH:hx90' }, },
 }
 
 
-return c
+local platform = require('platform')()
+local act = wezterm.action
+
+local mod = {}
+
+if platform.is_mac then
+   mod.SUPER = 'SUPER'
+   mod.SUPER_REV = 'SUPER|CTRL'
+elseif platform.is_win then
+   mod.SUPER = 'ALT' -- to not conflict with Windows key shortcuts
+   mod.SUPER_REV = 'ALT|CTRL'
+end
+
+config.keys = {
+    { key = 'w', mods = 'CTRL', action = act.CloseCurrentTab({ confirm = false }) },
+    { key = 't', mods = 'CTRL', action = act.SpawnTab('DefaultDomain') },
+
+
+    { key = 'F1', mods = 'NONE', action = 'ActivateCopyMode' },
+    { key = 'F2', mods = 'NONE', action = act.ActivateCommandPalette },
+    { key = 'F3', mods = 'NONE', action = act.ShowLauncher },
+    { key = 'F4', mods = 'NONE', action = act.ShowTabNavigator },
+
+
+    { key = 'F5', mods = 'NONE', action = act.SpawnCommandInNewTab {
+            args = { 'ubuntu' },
+        }
+    },
+    { key = 'F6', mods = 'NONE', action = act.SpawnCommandInNewTab {
+            domain = { DomainName = 'SSH:hx90' },
+        }
+    },
+
+    { key = 'F11', mods = 'NONE', action = act.ToggleFullScreen },
+    { key = 'F12', mods = 'NONE', action = act.ShowDebugOverlay },
+}
+
+
+return config
