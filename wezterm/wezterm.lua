@@ -51,17 +51,13 @@ config.keys = {
     { key = 'F1', mods = 'NONE', action = 'ActivateCopyMode' },
     { key = 'F2', mods = 'NONE', action = act.ActivateCommandPalette },
     { key = 'F3', mods = 'NONE', action = act.ShowLauncher },
-    { key = 'F4', mods = 'NONE', action = act.ShowTabNavigator },
+    -- { key = 'F4', mods = 'NONE', action = act.ShowTabNavigator },
+    { key = 'F4', mods = 'NONE', action = act.SpawnCommandInNewTab({ args = { 'ubuntu' }, }) },
 
-
-    { key = 'F5', mods = 'NONE', action = act.SpawnCommandInNewTab {
-            args = { 'ubuntu' },
-        }
-    },
-    { key = 'F6', mods = 'NONE', action = act.SpawnCommandInNewTab {
-            domain = { DomainName = 'SSH:hx90' },
-        }
-    },
+    { key = 'F5', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:hx90' }, }) },
+    { key = 'F6', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:occc' }, }) },
+    { key = 'F7', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:z790.t' },}) },
+    { key = 'F8', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:a401.t' }, }) },
 
     { key = 'F11', mods = 'NONE', action = act.ToggleFullScreen },
     { key = 'F12', mods = 'NONE', action = act.ShowDebugOverlay },
