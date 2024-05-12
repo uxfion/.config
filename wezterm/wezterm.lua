@@ -11,6 +11,7 @@ config.font_size = 12
 config.font = wezterm.font("JetBrainsMono Nerd Font")
 config.font = wezterm.font_with_fallback {
     'JetBrainsMono Nerd Font',
+    'PingFang SC',  -- 🅒
   }
 
 config.color_scheme = "Dracula"
