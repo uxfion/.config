@@ -9,6 +9,9 @@ config.initial_cols = 100
 config.initial_rows = 30
 config.font_size = 12
 config.font = wezterm.font("JetBrainsMono Nerd Font")
+config.font = wezterm.font_with_fallback {
+    'JetBrainsMono Nerd Font',
+  }
 
 config.color_scheme = "Dracula"
 config.window_background_opacity = 0.95
@@ -47,6 +50,20 @@ config.keys = {
     { key = 'w', mods = 'CTRL', action = act.CloseCurrentTab({ confirm = false }) },
     { key = 't', mods = 'CTRL', action = act.SpawnTab('DefaultDomain') },
 
+    {
+        key = 'c',
+        mods = 'CTRL',
+        action = wezterm.action_callback(function(window, pane)
+            selection_text = window:get_selection_text_for_pane(pane)
+            is_selection_active = string.len(selection_text) ~= 0
+            if is_selection_active then
+                window:perform_action(act.CopyTo('ClipboardAndPrimarySelection'), pane)
+            else
+                window:perform_action(act.SendKey{ key='c', mods='CTRL' }, pane)
+            end
+        end),
+    },
+    { key = 'v', mods = 'CTRL', action = act.PasteFrom 'Clipboard' },
 
     { key = 'F1', mods = 'NONE', action = 'ActivateCopyMode' },
     { key = 'F2', mods = 'NONE', action = act.ActivateCommandPalette },
