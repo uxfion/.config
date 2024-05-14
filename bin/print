@@ -37,7 +37,7 @@ print_color() {
     fi
 
     # Print the remaining text with the chosen formatting
-    echo -e "\e[${color_code}m$@\e[0m"
+    echo -e "\033[${color_code}m$@\033[0m"
 }
 
 # If script is sourced, do nothing, only define function
