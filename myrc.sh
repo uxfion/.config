@@ -56,14 +56,11 @@ op() {
     local input="$1"
     IFS=',' read -ra tags <<< "$input"
     for tag in "${tags[@]}"; do
-        # echo -e "\033[1;4;36mollama pull $tag\033[0m"
-        print -c cyan "ollama pull $tag"
-        ollama pull "$tag"
+        ido ollama pull "$tag"
     done
 }
 
 wez() {
-    print -c cyan "export TERM_PROGRAM=WezTerm"
-    export TERM_PROGRAM=WezTerm
+    ido export TERM_PROGRAM=WezTerm
 }
 

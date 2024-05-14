@@ -1,0 +1,16 @@
+#!/bin/bash
+
+ido() {
+    # 打印命令使用 cyan 颜色
+    print -c cyan "$*"
+
+    # 执行命令
+    "$@"
+}
+
+# If script is sourced, do nothing, only define function
+# If script is run directly, call print_color with all command line arguments
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    ido "$@"
+fi
+
