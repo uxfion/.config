@@ -5,7 +5,8 @@ ido() {
     print -c cyan "$*"
 
     # 执行命令
-    "$@"
+    # "$@"
+    eval "$*"
 }
 
 # If script is sourced, do nothing, only define function
