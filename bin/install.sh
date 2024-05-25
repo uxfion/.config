@@ -77,7 +77,7 @@ detect_apt() {
 # -------------------------- yazi --------------------------
 install_yazi_by_brew() {
     log "installing yazi and dependencies by brew"
-    packages=(yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide)
+    packages=(yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide bat)
     for package in "${packages[@]}"; do
         log "installing $package"
         for attempt in {1..2}; do
