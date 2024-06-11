@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# print_color function to print text in specified color, bold and underlined
-print_color() {
+# print function to print text in specified color, bold and underlined
+print() {
     # Display help if -h is the first argument
     if [[ "$1" == "-h" ]]; then
-        echo "Usage: print_color [-c COLOR] TEXT"
+        echo "Usage: print [-c COLOR] TEXT"
         echo "Options:"
         echo "  -c COLOR  Specify the color of the text. Available colors:"
         echo "            black, red, green, yellow, blue, purple, cyan, white"
@@ -41,8 +41,8 @@ print_color() {
 }
 
 # If script is sourced, do nothing, only define function
-# If script is run directly, call print_color with all command line arguments
+# If script is run directly, call print with all command line arguments
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    print_color "$@"
+    print "$@"
 fi
 
