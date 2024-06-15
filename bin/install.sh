@@ -1,5 +1,10 @@
 #!/bin/bash
 
+source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/print)
+source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/ido)
+source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/download_github_release.sh)
+
+
 tdir=''
 cleanup() {
     [ -n "$tdir" ] && {
@@ -76,57 +81,50 @@ detect_apt() {
 
 # -------------------------- yazi --------------------------
 install_yazi_by_brew() {
-    log "installing yazi and dependencies by brew"
+    print "installing yazi and dependencies by brew"
     packages=(yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide bat)
     for package in "${packages[@]}"; do
-        log "installing $package"
         for attempt in {1..2}; do
-            if brew install "$package"; then
+            if ido brew install "$package"; then
                 break
             elif [ "$attempt" -eq 2 ]; then
                 die "failed to install $package after 2 attempts"
             fi
-            log "retrying to install $package"
+            print -c purple "retrying to install $package"
         done
     done
-    log "yazi and dependencies installed"
+    print "yazi and dependencies installed"
 }
 
 download_yazi_binary() {
-    local _arch="$1"
-    local _releases_url="https://api.github.com/repos/sxyazi/yazi/releases/latest"
-    local _releases
-    _releases=$(fetch_quiet "$_releases_url")
-    # _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
-
     glibc_version=$(ldd --version | head -n1 | grep -oP '(\d+\.\d+)' | head -1)
     if [[ $(echo "$glibc_version < 2.32" | bc) -eq 1 ]]; then
         # glibc版本小于2.32
-        log "glibc version is less than 2.32, using musl version of yazi for compatibility"
-        _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-musl.zip")"
+        print -c purple "glibc version is less than 2.32, using musl version of yazi for compatibility"
+        ido download_github_release sxyazi/yazi $tdir linux $arch musl
     else
         # glibc版本等于或高于2.32
-        _package_url="$(echo "${_releases}" | grep "browser_download_url" | cut -d '"' -f 4 | grep "${_arch}" | grep "linux-gnu.zip")"
+        ido download_github_release sxyazi/yazi $tdir linux $arch gnu -e snap
     fi
 
-    fetch "$_package_url" > "$tdir/yazi.zip" || die "failed to download: $_package_url"
-    unzip -j -d "$tdir/yazi/" "$tdir/yazi.zip"
-    cp "$tdir/yazi/yazi" ~/.local/bin/yazi
+    ido unzip -j "$tdir/yazi*.zip" -d "$tdir/yazi/"
+    ido cp "$tdir/yazi/yazi" ~/.local/bin/yazi
+    ido cp "$tdir/yazi/ya" ~/.local/bin/ya
 }
 
 install_yazi_by_binary() {
-    log "installing yazi and dependencies by binary"
+    print "installing yazi and dependencies by binary"
     if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then
-        log "installing yazi $arch binary"
-        download_yazi_binary "$arch"
-        log "yazi installed to ~/.local/bin/yazi"
-        log "installing yazi dependencies"
-        sudo apt update
-        sudo apt install -y file unar jq fd-find ripgrep fzf ffmpegthumbnailer poppler-utils || die "failed to install dependencies"
-        log "installing zoxide"
-        curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
-        log "zoxide installed to ~/.local/bin/zoxide"
-        log "yazi and dependencies installed"
+        print "installing yazi $arch binary"
+        download_yazi_binary
+        print "yazi installed to ~/.local/bin/yazi"
+        print "installing yazi dependencies"
+        ido sudo apt update
+        ido sudo apt install -y file ffmpegthumbnailer unar jq poppler-utils fd-find ripgrep fzf bat
+        print "installing zoxide"
+        ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh"
+        print "zoxide installed to ~/.local/bin/zoxide"
+        print "yazi and dependencies installed"
     else
         die "unknown CPU architecture $arch"
     fi
@@ -237,8 +235,8 @@ install_starship_by_binary() {
 
 apt_prepare() {
     log "requirements before installation"
-    sudo apt update
-    sudo apt install -y git build-essential curl python3-pip unzip bc || die "failed to install dependencies"
+    ido sudo apt update
+    ido sudo apt install -y git build-essential curl jq python3-pip unzip bc || die "failed to install dependencies"
 }
 
 config() {
