@@ -20,7 +20,7 @@ die() {
 }
 
 log() {
-    printf "\033[1;36;4m%s\033[0m\n\r" "$*" > /dev/stderr;
+    printf "\033[1;34;4m%s\033[0m\n\r" "$*" > /dev/stderr;
 }
 
 detect_network_tool() {
@@ -81,7 +81,7 @@ detect_apt() {
 
 # -------------------------- yazi --------------------------
 install_yazi_by_brew() {
-    print "installing yazi and dependencies by brew"
+    print -c blue "installing yazi and dependencies by brew"
     packages=(yazi ffmpegthumbnailer unar jq poppler fd ripgrep fzf zoxide bat)
     for package in "${packages[@]}"; do
         for attempt in {1..2}; do
@@ -93,7 +93,7 @@ install_yazi_by_brew() {
             print -c purple "retrying to install $package"
         done
     done
-    print "yazi and dependencies installed"
+    print -c blue "yazi and dependencies installed"
 }
 
 download_yazi_binary() {
@@ -113,18 +113,18 @@ download_yazi_binary() {
 }
 
 install_yazi_by_binary() {
-    print "installing yazi and dependencies by binary"
+    print -c blue "installing yazi and dependencies by binary"
     if [ "$arch" = "x86_64" ] || [ "$arch" = "aarch64" ]; then
-        print "installing yazi $arch binary"
+        print -c blue "installing yazi $arch binary"
         download_yazi_binary
-        print "yazi installed to ~/.local/bin/yazi"
-        print "installing yazi dependencies"
+        print -c blue "yazi installed to ~/.local/bin/yazi"
+        print -c blue "installing yazi dependencies"
         ido sudo apt update
         ido sudo apt install -y file ffmpegthumbnailer unar jq poppler-utils fd-find ripgrep fzf bat
-        print "installing zoxide"
+        print -c blue "installing zoxide"
         ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh"
-        print "zoxide installed to ~/.local/bin/zoxide"
-        print "yazi and dependencies installed"
+        print -c blue "zoxide installed to ~/.local/bin/zoxide"
+        print -c blue "yazi and dependencies installed"
     else
         die "unknown CPU architecture $arch"
     fi
