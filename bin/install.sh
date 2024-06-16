@@ -2,7 +2,7 @@
 
 source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/print)
 source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/ido)
-source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/download_github_release.sh)
+source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/download_github_release.sh)
 
 
 tdir=''
