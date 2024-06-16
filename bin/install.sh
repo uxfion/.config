@@ -103,13 +103,20 @@ download_yazi_binary() {
     ido cp "$tdir/yazi/ya" ~/.local/bin/ya
 }
 
+download_bat_binary() {
+    ido download_github_release sharkdp/bat $tdir linux $arch gnu
+    ido tar -xzf $tdir/bat-*.tar.gz -C $tdir
+    ido cp $tdir/bat-*/bat ~/.local/bin/bat
+}
+
 install_yazi_by_binary() {
     print -c blue "==== installing yazi by binary......"
     download_yazi_binary || die "failed to download yazi binary"
     print -c blue "yazi installed to ~/.local/bin/yazi"
     ido sudo apt-get update
-    ido sudo apt-get install -y file ffmpegthumbnailer unar jq poppler-utils fd-find ripgrep fzf bat || die "failed to install dependencies"
-    # TODO: bat ubuntu problem
+    ido sudo apt-get install -y file ffmpegthumbnailer unar jq poppler-utils fd-find ripgrep fzf || die "failed to install dependencies"
+    download_bat_binary || die "failed to download bat binary"
+    print -c blue "bat installed to ~/.local/bin/bat"
     print -c blue "installing zoxide"
     ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
     print -c blue "zoxide installed to ~/.local/bin/zoxide"
