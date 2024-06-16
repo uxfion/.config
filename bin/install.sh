@@ -109,12 +109,24 @@ download_bat_binary() {
     ido cp $tdir/bat-*/bat ~/.local/bin/bat
 }
 
+download_fzf_binary() {
+    if [ "$arch" = "x86_64" ]; then
+        ido download_github_release junegunn/fzf $tdir linux amd64
+    elif [ "$arch" = "aarch64" ]; then
+        ido download_github_release junegunn/fzf $tdir linux arm64
+    fi
+    ido tar -xzf $tdir/fzf-*.tar.gz -C $tdir
+    ido cp $tdir/fzf ~/.local/bin/fzf
+}
+
 install_yazi_by_binary() {
     print -c blue "==== installing yazi by binary......"
     download_yazi_binary || die "failed to download yazi binary"
     print -c blue "yazi installed to ~/.local/bin/yazi"
     ido sudo apt-get update
-    ido sudo apt-get install -y file ffmpegthumbnailer unar jq poppler-utils fd-find ripgrep fzf || die "failed to install dependencies"
+    ido sudo apt-get install -y file ffmpegthumbnailer unar jq poppler-utils fd-find ripgrep || die "failed to install dependencies"
+    download_fzf_binary || die "failed to download fzf binary"
+    print -c blue "fzf installed to ~/.local/bin/fzf"
     download_bat_binary || die "failed to download bat binary"
     print -c blue "bat installed to ~/.local/bin/bat"
     print -c blue "installing zoxide"
