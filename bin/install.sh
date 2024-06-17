@@ -152,7 +152,7 @@ download_nvim_binary() {
         ido download_github_release neovim/neovim ~/.local/bin appimage -e sha256 -e zsync
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release matsuu/neovim-aarch64-appimage ~/.local/bin
-        ido mv ~/.local/bin/nvim-*-aarch64.appimage ~/.local/bin/nvim.appimage
+        ido cp ~/.local/bin/nvim-*-aarch64.appimage ~/.local/bin/nvim.appimage
     fi
     ido "chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim"
 }
@@ -185,8 +185,8 @@ install_lazygit_by_binary() {
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release jesseduffield/lazygit $tdir linux arm64
     fi
-    ido tar -xzf "$tdir/lazygit_*.tar.gz" -C $tdir lazygit
-    ido sudo install "$tdir/lazygit" ~/.local/bin
+    ido tar -xzf $tdir/lazygit_*.tar.gz -C $tdir lazygit
+    ido sudo install $tdir/lazygit ~/.local/bin
     print -c blue "lazygit installed to ~/.local/bin/lazygit"
     print -c blue "==== lazygit installed."
 }
@@ -220,6 +220,23 @@ install_starship_by_binary() {
     print -c blue "==== starship installed."
 }
 # ----------------------------------------------------------
+
+# -------------------------- btop --------------------------
+install_btop_by_brew() {
+    print -c blue "==== installing btop by brew......"
+    brew install btop
+    print -c blue "==== btop installed."
+}
+install_btop_by_binary() {
+    print -c blue "==== installing btop by binary......"
+    ido download_github_release aristocratos/btop $tdir linux $arch
+    ido tar -xjf $tdir/btop-*.tbz -C $tdir
+    ido cp $tdir/btop/bin/btop ~/.local/bin/btop
+    ido mkdir -p ~/.config/btop
+    ido cp -r $tdir/btop/themes ~/.config/btop
+    print -c blue "btop installed to ~/.local/bin/btop"
+    print -c blue "==== btop installed."
+}
 
 apt_prepare() {
     print -c blue "requirements before installation"
@@ -305,6 +322,7 @@ main() {
             install_lazygit_by_brew
             install_tmux_by_brew
             install_starship_by_brew
+            install_btop_by_brew
         else
             die "brew is not installed"
         fi
@@ -316,6 +334,7 @@ main() {
             install_lazygit_by_brew
             install_tmux_by_brew
             install_starship_by_brew
+            install_btop_by_brew
         elif [ "$apt_installed" = true ]; then
             print -c purple "using apt and binaries to install"
             apt_prepare
@@ -324,6 +343,7 @@ main() {
             install_lazygit_by_binary
             install_tmux_by_apt
             install_starship_by_binary
+            install_btop_by_binary
         else
             die "brew and apt are not installed"
         fi
