@@ -359,3 +359,5 @@ main() {
 }
 
 main "$@"
+# TODO: -m --mirror
+# TODO: sing-box?

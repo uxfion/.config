@@ -64,3 +64,4 @@ wez() {
     ido export TERM_PROGRAM=WezTerm
 }
 
+# TODO: set_proxy
