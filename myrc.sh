@@ -18,6 +18,7 @@ if docker compose version &> /dev/null; then
 else
     alias dc='docker-compose'
 fi
+alias dcc='docker context'
 alias dr='dc down && dc pull && dc build && dc up -d'
 alias dd='dc down'
 alias dl='dc logs -f'
@@ -81,4 +82,13 @@ update_config() {
     git reset --hard HEAD
     git pull
     cd -
+}
+
+show_env() {
+    env | grep -i "$1"
+}
+
+show_path() {
+    # echo -e ${PATH//:/'\n'}
+    echo $PATH | tr ':' '\n'
 }
