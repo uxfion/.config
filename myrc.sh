@@ -92,3 +92,7 @@ show_path() {
     # echo -e ${PATH//:/'\n'}
     echo $PATH | tr ':' '\n'
 }
+
+if [ -d "$HOME/.local/share/kitty-ssh-kitten/kitty/bin" ] && [[ ":$PATH:" != *":$HOME/.local/share/kitty-ssh-kitten/kitty/bin:"* ]]; then
+    ido export PATH="$PATH:$HOME/.local/share/kitty-ssh-kitten/kitty/bin"
+fi

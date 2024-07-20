@@ -349,6 +349,7 @@ main() {
             die "brew and apt are not installed"
         fi
     fi
+    ido kitten update-self
     print -c blue "------- configuring -------"
     config
     rc
