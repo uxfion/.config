@@ -70,7 +70,7 @@ op() {
 }
 
 wez() {
-    ido export TERM_PROGRAM=WezTerm
+    export TERM_PROGRAM=WezTerm
 }
 
 install_config() {
@@ -94,5 +94,5 @@ show_path() {
 }
 
 if [ -d "$HOME/.local/share/kitty-ssh-kitten/kitty/bin" ] && [[ ":$PATH:" != *":$HOME/.local/share/kitty-ssh-kitten/kitty/bin:"* ]]; then
-    ido export PATH="$PATH:$HOME/.local/share/kitty-ssh-kitten/kitty/bin"
+    export PATH="$PATH:$HOME/.local/share/kitty-ssh-kitten/kitty/bin"
 fi
