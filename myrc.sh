@@ -4,12 +4,20 @@ export PATH=~/.config/bin:$PATH
 if [[ $SHELL == */bash ]]; then
     eval "$(zoxide init bash)"
     eval "$(starship init bash)"
+    eval "$(fzf --bash)"
 elif [[ $SHELL == */zsh ]]; then
     eval "$(zoxide init zsh)"
     eval "$(starship init zsh)"
+    source <(fzf --zsh)
 fi
 
-alias dc='docker compose'
+# alias dc='docker compose'
+# 改为自动检测
+if docker compose version &> /dev/null; then
+    alias dc='docker compose'
+else
+    alias dc='docker-compose'
+fi
 alias dr='dc down && dc pull && dc build && dc up -d'
 alias dd='dc down'
 alias dl='dc logs -f'
@@ -18,14 +26,14 @@ alias dpp='docker system prune -a'
 alias de='docker exec -it'
 alias dt='docker run -it --rm'
 
-alias r='ya'
-function ya() {
-    local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
-    yazi "$@" --cwd-file="$tmp"
-    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
-        cd -- "$cwd"
-    fi
-    rm -f -- "$tmp"
+alias r='yy'
+function yy() {
+	local tmp="$(mktemp -t "yazi-cwd.XXXXXX")"
+	yazi "$@" --cwd-file="$tmp"
+	if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+		cd -- "$cwd"
+	fi
+	rm -f -- "$tmp"
 }
 
 export EDITOR='nvim'
@@ -64,4 +72,13 @@ wez() {
     ido export TERM_PROGRAM=WezTerm
 }
 
-# TODO: set_proxy
+install_config() {
+    bash <(curl https://raw.githubusercontent.com/uxfion/.config/main/bin/install.sh)
+}
+
+update_config() {
+    cd ~/.config
+    git reset --hard HEAD
+    git pull
+    cd -
+}

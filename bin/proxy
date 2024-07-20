@@ -1,0 +1,18 @@
+# TODO: set_proxy
+# TODO: sing-box
+
+function proxy_on(){
+    ido export all_proxy=socks5://127.0.0.1:1087
+    ido export http_proxy=http://127.0.0.1:1087
+    ido export https_proxy=https://127.0.0.1:1087
+    print "已开启代理"
+}
+
+function proxy_off(){
+    ido unset all_proxy
+    ido unset http_proxy
+    ido unset https_proxy
+    print "已关闭代理"
+}
+
+

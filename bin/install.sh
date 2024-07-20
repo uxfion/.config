@@ -256,7 +256,8 @@ config() {
         ido mkdir -p $CONFIG_DIR
     fi
 
-    ido cd $CONFIG_DIR
+    # cd不能使用id，否则无法改变目录
+    cd $CONFIG_DIR
 
     # 检查当前目录是否是一个 git 仓库
     if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
@@ -360,4 +361,3 @@ main() {
 
 main "$@"
 # TODO: -m --mirror
-# TODO: sing-box?
