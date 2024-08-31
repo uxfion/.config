@@ -15,3 +15,12 @@ edit = [
     { run = 'code "$@"', desc = 'VS Code', orphan = true, for = 'unix' },
     { run = 'code "%*"', desc = 'VS Code', orphan = true, for = "windows" },
 ]
+
+[plugin]
+prepend_previewers = [
+    { mime = "video/*", run = "video-ffmpeg" },
+]
+
+prepend_preloaders = [
+    { mime = "video/*", run = "video-ffmpeg" },
+]

@@ -7,4 +7,6 @@ prepend_keymap = [
     { on = [ "Z" ], run  = "plugin fg --args='fzf'", desc = "fzf preview" },  # 查找文件名/文件夹，有模糊匹配
     { on = [ "s" ], run  = "plugin fg --args='rg'", desc = "search context rg" },  # 查找文件内容 没有模糊匹配
     { on = [ "S" ], run  = "plugin fg", desc = "search context fzf" },  # 查找文件内容，有模糊匹配
+    { on = [ "M" ], run  = "plugin chmod",desc = "chmod on selected files"},
+    { on = [ "F" ], run  = "plugin smart-filter"}
 ]

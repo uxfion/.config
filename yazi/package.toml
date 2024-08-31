@@ -1,0 +1,10 @@
+[plugin]
+deps = [
+    { use = "yazi-rs/plugins:chmod", rev = "2b001d2" },
+    { use = "yazi-rs/plugins:max-preview", rev = "2b001d2" },
+    { use = "yazi-rs/plugins:smart-filter", rev = "2b001d2" },
+    { use = "Tyarel8/video-ffmpeg", rev = "fe26a18" },
+]
+
+[flavor]
+deps = []
