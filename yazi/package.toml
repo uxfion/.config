@@ -4,7 +4,7 @@ deps = [
     { use = "yazi-rs/plugins:max-preview", rev = "a8421d9" },
     { use = "yazi-rs/plugins:smart-filter", rev = "a8421d9" },
     { use = "Tyarel8/video-ffmpeg", rev = "fe26a18" },
-    { use = "KKV9/compress", rev = "60b24af" },
+    { use = "KKV9/compress", rev = "60b24af" }, { use = "AnirudhG07/custom-shell", rev = "bf72fdc" },
 ]
 
 [flavor]
