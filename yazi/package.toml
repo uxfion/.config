@@ -5,8 +5,8 @@ deps = [
     { use = "yazi-rs/plugins:smart-filter", rev = "a8421d9" },
     { use = "Tyarel8/video-ffmpeg", rev = "fe26a18" },
     { use = "KKV9/compress", rev = "60b24af" },
-    { use = "uxfion/custom-shell", rev = "f440136" },
     { use = "orhnk/system-clipboard", rev = "7775a80" },
+    { use = "KKV9/shell", rev = "d456cc1" },
 ]
 
 [flavor]
