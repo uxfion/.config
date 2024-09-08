@@ -13,10 +13,11 @@ prepend_keymap = [
     { on = [ "c", "m" ], run  = "plugin chmod", desc = "Chmod on selected files" },
     { on = [ "c", "a" ], run  = "plugin compress", desc = "Archive selected files" },
     { on = [ "c", "p" ], run  = "plugin command", desc = "Command panel" },
+    { on = [ "c", "t" ], run = "plugin test" },
 
     { on = [ "'" ], run = "plugin shell --args=--block", desc = "Default shell with blocking"},
     { on = [ "\"" ], run = "plugin shell", desc = "Default shell"},
 
     { on = [ "<C-c>" ], run = "plugin system-clipboard", desc = "Copy to system-clipboard" },
-    { on = [ "<C-v>" ], run = "shell 'cb paste' --block --confirm" , desc = "Paste from system-clipboard" }
+    { on = [ "<C-v>" ], run = "shell 'cb paste' --block --confirm" , desc = "Paste from system-clipboard" },
 ]
