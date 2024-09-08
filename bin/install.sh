@@ -134,7 +134,7 @@ download_7zip_binary() {
         ido download_github_release ip7z/7zip $tdir linux arm64
     fi
     mkdir -p $tdir/7zip
-    ido tar -xJf 7z*.tar.xz -C $tdir/7zip
+    ido tar -xJf $tdir/7z*.tar.xz -C $tdir/7zip
     ido cp $tdir/7zip/7zzs ~/.local/bin/7zz
     ido chmod +x ~/.local/bin/7zz
 }
@@ -157,7 +157,7 @@ download_fd_binary() {
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release sharkdp/fd $tdir linux aarch64 musl
     fi
-    ido tar -xzf fd-*.tar.gz -C $tdir
+    ido tar -xzf $tdir/fd-*.tar.gz -C $tdir
     ido cp $tdir/fd-*/fd ~/.local/bin/fd
     ido chmod +x ~/.local/bin/fd
 }
@@ -168,7 +168,7 @@ download_ripgrep_binary() {
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release BurntSushi/ripgrep $tdir linux aarch64 gnu -e sha256  # arm64只有gnu的，没有musl
     fi
-    ido tar -xzf fd-*.tar.gz -C $tdir
+    ido tar -xzf $tdir/fd-*.tar.gz -C $tdir
     ido cp $tdir/fd-*/fd ~/.local/bin/fd
     ido chmod +x ~/.local/bin/fd
 }
@@ -192,7 +192,7 @@ download_fzf_binary() {
 #         # ido download_github_release ImageMagick/ImageMagick $tdir linux arm64
 #         print -c purple "no arm64 binary provided, skipping..."
 #     fi
-#     ido cp ImageMagick-*.AppImage ~/.local/bin/imagemagick.appimage
+#     ido cp $tdir/ImageMagick-*.AppImage ~/.local/bin/imagemagick.appimage
 #     ido "chmod +x ~/.local/bin/imagemagick.appimage && ln -sf ~/.local/bin/imagemagick.appimage ~/.local/bin/magick"
 # }
 
@@ -248,6 +248,9 @@ install_yazi_by_binary() {
     
     print -c blue "installing zoxide..."
     ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
+    
+    # TODO: 清理zoxide安装脚本后的/tmp临时垃圾
+
     print -c blue "zoxide installed to ~/.local/bin/zoxide"
 
     print -c blue "==== yazi installed."
@@ -299,7 +302,7 @@ install_lazygit_by_brew() {
 install_lazygit_by_binary() {
     print -c blue "==== installing lazygit by binary......"
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release jesseduffield/lazygit $tdir linux x86_64
+        ido download_github_release jesseduffield/lazygit $tdir linux x86_64  # static
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release jesseduffield/lazygit $tdir linux arm64
     fi
@@ -334,7 +337,7 @@ install_starship_by_brew() {
 }
 install_starship_by_binary() {
     print -c blue "==== installing starship by binary......"
-    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"
+    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
     print -c blue "==== starship installed."
 }
 # ----------------------------------------------------------
@@ -347,7 +350,7 @@ install_btop_by_brew() {
 }
 install_btop_by_binary() {
     print -c blue "==== installing btop by binary......"
-    ido download_github_release aristocratos/btop $tdir linux $arch
+    ido download_github_release aristocratos/btop $tdir linux $arch  # static
     ido tar -xjf $tdir/btop-*.tbz -C $tdir
     ido cp $tdir/btop/bin/btop ~/.local/bin/btop
     ido mkdir -p ~/.config/btop
