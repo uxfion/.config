@@ -3,15 +3,20 @@ prepend_keymap = [
     { on = [ "T" ], run = "plugin --sync max-preview" },
 	{ on = [ "<C-s>" ], run = 'shell "$SHELL" --block --confirm', desc = "shell" },
 	{ on = [ "<C-g>" ], run = 'shell lazygit --block --confirm', desc = "lazygit" },
+
     # z zoxide 快速跳转文件夹
     { on = [ "Z" ], run  = "plugin fg --args='fzf'", desc = "fzf preview" },  # 查找文件名/文件夹，有模糊匹配
     { on = [ "s" ], run  = "plugin fg --args='rg'", desc = "search context rg" },  # 查找文件内容 没有模糊匹配
     { on = [ "S" ], run  = "plugin fg", desc = "search context fzf" },  # 查找文件内容，有模糊匹配
     { on = [ "F" ], run  = "plugin smart-filter", desc = "Smart filter" },
+
     { on = [ "c", "m" ], run  = "plugin chmod", desc = "Chmod on selected files" },
     { on = [ "c", "a" ], run  = "plugin compress", desc = "Archive selected files" },
+    { on = [ "c", "p" ], run  = "plugin command", desc = "Command panel" },
+
     { on = [ "'" ], run = "plugin shell --args=--block", desc = "Default shell with blocking"},
     { on = [ "\"" ], run = "plugin shell", desc = "Default shell"},
-    { on = [ "<C-c>" ], run = "plugin system-clipboard", desc = "Copy to clipboard by cb" },
-    { on = [ "<C-v>" ], run = "shell 'cb paste' --block --confirm" }
+
+    { on = [ "<C-c>" ], run = "plugin system-clipboard", desc = "Copy to system-clipboard" },
+    { on = [ "<C-v>" ], run = "shell 'cb paste' --block --confirm" , desc = "Paste from system-clipboard" }
 ]
