@@ -193,7 +193,8 @@ download_lazygit_binary() {
         ido download_github_release jesseduffield/lazygit $tdir linux arm64
     fi
     ido tar -xzf $tdir/lazygit_*.tar.gz -C $tdir lazygit
-    ido install $tdir/lazygit ~/.local/bin
+    ido cp $tdir/lazygit ~/.local/bin/lazygit
+    ido chmod +x ~/.local/bin/lazygit
 }
 
 install_yazi() {
