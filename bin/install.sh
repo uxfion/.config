@@ -363,12 +363,15 @@ install_tools() {
             ;;
     esac
 
+    # TODO: openwrt安装starship失败
     ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
 
     download_btop_binary || die "failed to download btop binary"
     print -c green "btop installed to ~/.local/bin/btop"
-    ido kitten update-self
 
+    # TODO: xh, neofetch(?), lazydocker(?), iftop(?)
+
+    ido kitten update-self
     print -c green "==== tools installed!"
 }
 # ----------------------------------------------------------
