@@ -76,7 +76,7 @@ detect_package_manager() {
     else
         die "No supported package manager found"
     fi
-    print -c blue "Package Manager: $PACKAGE_MANAGER"
+    print -c green "Package Manager: $PACKAGE_MANAGER"
 }
 
 # -------------------------- yazi --------------------------
@@ -197,13 +197,13 @@ download_lazygit_binary() {
 }
 
 install_yazi() {
-    print -c blue "==== installing yazi..."
+    print -c green "==== installing yazi..."
     case "$PACKAGE_MANAGER" in
         brew)
             # ffmpegthumbnailer unar
             ido brew update
             ido brew install yazi ffmpeg sevenzip jq poppler fd ripgrep fzf zoxide imagemagick bat clipboard lazygit || die "failed to install yazi and deps"
-            print -c blue "==== yazi installed!"
+            print -c green "==== yazi installed!"
             return 0
             ;;
         apt)
@@ -227,44 +227,44 @@ install_yazi() {
     # binary要安装： ffmpeg 7zip jq fd ripgrep fzf
 
     download_yazi_binary || die "failed to download yazi binary"
-    print -c blue "yazi installed to ~/.local/bin/yazi"
+    print -c green "yazi installed to ~/.local/bin/yazi"
 
     download_ffmpeg_binary || die "failed to download ffmpeg binary"
-    print -c blue "ffmpeg and ffprobe installed to ~/.local/bin/ffmpeg ffprobe"
+    print -c green "ffmpeg and ffprobe installed to ~/.local/bin/ffmpeg ffprobe"
 
     download_7zip_binary || die "failed to download 7-zip binary"
-    print -c blue "7-zip installed to ~/.local/bin/7zz"
+    print -c green "7-zip installed to ~/.local/bin/7zz"
 
     download_jq_binary || die "failed to download jq binary"
-    print -c blue "jq installed to ~/.local/bin/jq"
+    print -c green "jq installed to ~/.local/bin/jq"
 
     # TODO: poppler
 
     download_fd_binary || die "failed to download fd binary"
-    print -c blue "fd installed to ~/.local/bin/fd"
+    print -c green "fd installed to ~/.local/bin/fd"
 
     download_ripgrep_binary || die "failed to download ripgrep binary"
-    print -c blue "ripgrep installed to ~/.local/bin/rg"
+    print -c green "ripgrep installed to ~/.local/bin/rg"
 
     download_fzf_binary || die "failed to download fzf binary"
-    print -c blue "fzf installed to ~/.local/bin/fzf"
+    print -c green "fzf installed to ~/.local/bin/fzf"
 
-    print -c blue "installing zoxide by script..."
+    print -c green "installing zoxide by script..."
     ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
     # TODO: 清理zoxide安装脚本后的/tmp临时垃圾
-    print -c blue "zoxide installed to ~/.local/bin/zoxide"
+    print -c green "zoxide installed to ~/.local/bin/zoxide"
 
     # TODO: imagemagick
 
     download_bat_binary || die "failed to download bat binary"
-    print -c blue "bat installed to ~/.local/bin/bat"
+    print -c green "bat installed to ~/.local/bin/bat"
 
     # clipboard在vps上没必要，只需要在pc上安装即可，brew或者scoop
     
     download_lazygit_binary || die "failed to download lazygit binary"
-    print -c blue "lazygit installed to ~/.local/bin/lazygit"
+    print -c green "lazygit installed to ~/.local/bin/lazygit"
 
-    print -c blue "==== yazi installed!"
+    print -c green "==== yazi installed!"
 }
 # ----------------------------------------------------------
 
@@ -281,7 +281,7 @@ download_nvim_appimage() {
 }
 
 install_lazyvim() {
-    print -c blue "==== installing lazyvim..."
+    print -c green "==== installing lazyvim..."
     case "$PACKAGE_MANAGER" in
         brew)
             # 已在yazi中安装了 lazygit fd ripgrep
@@ -297,7 +297,7 @@ install_lazyvim() {
             ido sudo apt-get install -y libfuse2 || die "failed to install libfuse2"
             # TODO: 高于ubuntu24需要libfuse2t64，https://github.com/AppImage/AppImageKit/wiki/FUSE#type-2-appimage
             download_nvim_appimage || die "failed to download nvim appimage"
-            print -c blue "nvim installed to ~/.local/bin/nvim"
+            print -c green "nvim installed to ~/.local/bin/nvim"
             ido "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -" || die "failed to setup nodejs repository"
             ido sudo apt-get install -y nodejs || die "failed to install nodejs"
             # ido npm install -g neovim
@@ -317,7 +317,7 @@ install_lazyvim() {
             die "Unsupported package manager: $PACKAGE_MANAGER"
             ;;
     esac
-    print -c blue "==== lazyvim installed!"
+    print -c green "==== lazyvim installed!"
 }
 # ----------------------------------------------------------
 
@@ -334,7 +334,7 @@ download_btop_binary() {
 }
 
 install_tools() {
-    print -c blue "==== installing tools..."
+    print -c green "==== installing tools..."
     case "$PACKAGE_MANAGER" in
         brew)
             ido brew update
@@ -342,7 +342,7 @@ install_tools() {
             ido brew install starship || die "failed to install starship"
             ido brew install btop || die "failed to install btop"
             ido kitten update-self
-            print -c blue "==== tools installed!"
+            print -c green "==== tools installed!"
             return 0
             ;;
         apt)
@@ -365,15 +365,15 @@ install_tools() {
     ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
 
     download_btop_binary || die "failed to download btop binary"
-    print -c blue "btop installed to ~/.local/bin/btop"
+    print -c green "btop installed to ~/.local/bin/btop"
     ido kitten update-self
 
-    print -c blue "==== tools installed!"
+    print -c green "==== tools installed!"
 }
 # ----------------------------------------------------------
 
 prepare() {
-    print -c blue "prepare requirements before installation..."
+    print -c green "prepare requirements before installation..."
     case "$PACKAGE_MANAGER" in
         brew)
             ido brew install curl wget git jq unzip || die "failed to install prepare deps"
@@ -397,7 +397,7 @@ prepare() {
     esac
     ido mkdir -p ~/.local/bin
     ido mkdir -p ~/.config
-    print -c blue "prepare requirements installed!"
+    print -c green "prepare requirements installed!"
 }
 
 config() {
@@ -417,7 +417,7 @@ config() {
 
     # 检查当前目录是否是一个 git 仓库
     if ! git rev-parse --is-inside-work-tree > /dev/null 2>&1; then
-        print -c blue "init git repo in $CONFIG_DIR"
+        print -c green "init git repo in $CONFIG_DIR"
         ido git init
         ido git remote add origin "$GIT_REPO"
         ido git fetch origin main:main
@@ -428,7 +428,7 @@ config() {
         # 检查设置的远程仓库是否正确
         REMOTE_URL=$(git remote get-url origin)
         if [ "$REMOTE_URL" = "$GIT_REPO" ] || [ "$REMOTE_URL" = "$GIT_REPO_SSH" ]; then
-            print -c blue "remote repo already set, pulling"
+            print -c green "remote repo already set, pulling"
             print -c purple "nuke working tree"
             ido git reset --hard HEAD
             ido git pull
@@ -445,48 +445,50 @@ rc() {
         CONFIG_FILE="$HOME/.zshrc"
     elif [ "$SHELL" = "/bin/bash" ]; then
         CONFIG_FILE="$HOME/.bashrc"
+    # TODO: sh 不支持
     else
-        die "unsupported shell type: $SHELL"
+        print -c purple "unsupported shell type: $SHELL"
+        print -c purple "\$0: $0"
     fi
 
     if grep -qF -- "source ~/.config/myrc.sh" "$CONFIG_FILE"; then
-        print -c blue "myrc.sh exists in $CONFIG_FILE, no need to add."
+        print -c green "myrc.sh exists in $CONFIG_FILE, no need to add."
     else
         ido "echo -e "$LINE_TO_ADD" >> $CONFIG_FILE"
-        print -c blue "added myrc.sh to $CONFIG_FILE"
+        print -c green "added myrc.sh to $CONFIG_FILE"
     fi
 }
 
 main() {
-    print -c blue "---------- info ----------"
+    print -c green "---------- info ----------"
     detect_arch_os
-    print -c blue "OS: $OS"
-    print -c blue "arch: $arch"
+    print -c green "OS: $OS"
+    print -c green "arch: $arch"
     detect_network_tool
     detect_package_manager
-    print -c blue "package manager: $PACKAGE_MANAGER"
+    print -c green "package manager: $PACKAGE_MANAGER"
 
     tdir=$(command mktemp -d "/tmp/config-install-XXXXXXXXXXXX")
-    print -c blue "temp dir: $tdir"
-    print -c blue "bin dir: ~/.local/bin"
+    print -c green "temp dir: $tdir"
+    print -c green "bin dir: ~/.local/bin"
 
-    print -c blue "------- preparing -------"
+    print -c green "------- preparing -------"
     prepare
 
-    print -c blue "------- installing -------"
+    print -c green "------- installing -------"
     install_yazi
     install_lazyvim
     install_tools
     
-    print -c blue "------- configuring -------"
+    print -c green "------- configuring -------"
     config
     rc
 
-    print -c blue "------- cleaning -------"
+    print -c green "------- cleaning -------"
     cleanup
 
-    print -c blue "------- done! -------"
-    print -c blue "please run the following command to apply the changes:"
+    print -c green "------- done! -------"
+    print -c green "please run the following command to apply the changes:"
     print -c purple "source $CONFIG_FILE"
 }
 
