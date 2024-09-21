@@ -193,7 +193,7 @@ download_lazygit_binary() {
         ido download_github_release jesseduffield/lazygit $tdir linux arm64
     fi
     ido tar -xzf $tdir/lazygit_*.tar.gz -C $tdir lazygit
-    ido sudo install $tdir/lazygit ~/.local/bin
+    ido install $tdir/lazygit ~/.local/bin
 }
 
 install_yazi() {
@@ -384,7 +384,7 @@ prepare() {
             ;;
         apk)
             ido apk update
-            ido apk add bash curl wget git jq unzip tar || die "failed to install prepare deps"
+            ido apk add bash curl wget git jq unzip tar xz || die "failed to install prepare deps"
             ;;
         opkg)
             ido opkg update
