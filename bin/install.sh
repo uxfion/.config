@@ -44,7 +44,7 @@ detect_network_tool() {
     fi
 }
 
-detect_os() {
+detect_arch_os() {
     arch=""
     case "$(command uname)" in
         'Darwin') OS="macos";;
@@ -64,42 +64,23 @@ detect_os() {
     esac
 }
 
-detect_brew() {
+detect_package_manager() {
     if command -v brew > /dev/null 2>&1; then
-        brew_installed=true
+        PACKAGE_MANAGER="brew"
+    elif command -v apt > /dev/null 2>&1; then
+        PACKAGE_MANAGER="apt"
+    elif command -v apk > /dev/null 2>&1; then
+        PACKAGE_MANAGER="apk"
+    elif command -v opkg > /dev/null 2>&1; then
+        PACKAGE_MANAGER="opkg"
     else
-        brew_installed=false
+        die "No supported package manager found"
     fi
-}
-
-detect_apt() {
-    if command -v apt > /dev/null 2>&1; then
-        apt_installed=true
-    else
-        apt_installed=false
-    fi
+    print -c blue "Package Manager: $PACKAGE_MANAGER"
 }
 
 # -------------------------- yazi --------------------------
-install_yazi_by_brew() {
-    print -c blue "==== installing yazi by brew......"
-    # ffmpegthumbnailer unar
-    ido brew install yazi ffmpeg sevenzip jq poppler fd ripgrep fzf zoxide imagemagick bat || die "failed to install yazi and dependencies"
-    print -c blue "==== yazi installed."
-}
-
 download_yazi_binary() {
-    # # 为了兼容性所有都用static文件，就不用gnu了，因为gnu通常为dynamic
-    # glibc_version=$(ldd --version | head -n1 | grep -oP '(\d+\.\d+)' | head -1)
-    # if [[ $(echo "$glibc_version < 2.32" | bc) -eq 1 ]]; then
-    #     # glibc版本小于2.32
-    #     print -c purple "glibc version is less than 2.32, using musl version of yazi for compatibility."
-    #     ido download_github_release sxyazi/yazi $tdir linux $arch musl
-    # else
-    #     # glibc版本等于或高于2.32
-    #     ido download_github_release sxyazi/yazi $tdir linux $arch gnu -e snap
-    # fi
-
     if [ "$arch" = "x86_64" ]; then
         ido download_github_release sxyazi/yazi $tdir linux x86 musl
     elif [ "$arch" = "aarch64" ]; then
@@ -149,8 +130,6 @@ download_jq_binary() {
     ido chmod +x ~/.local/bin/jq
 }
 
-# TODO: poppler
-
 download_fd_binary() {
     if [ "$arch" = "x86_64" ]; then
         ido download_github_release sharkdp/fd $tdir linux x86 musl  # static
@@ -196,7 +175,6 @@ download_fzf_binary() {
 #     ido "chmod +x ~/.local/bin/imagemagick.appimage && ln -sf ~/.local/bin/imagemagick.appimage ~/.local/bin/magick"
 # }
 
-
 download_bat_binary() {
     if [ "$arch" = "x86_64" ]; then
         ido download_github_release sharkdp/bat $tdir linux x86 musl  # static
@@ -208,15 +186,45 @@ download_bat_binary() {
     ido chmod +x ~/.local/bin/bat
 }
 
+download_lazygit_binary() {
+    if [ "$arch" = "x86_64" ]; then
+        ido download_github_release jesseduffield/lazygit $tdir linux x86_64  # static
+    elif [ "$arch" = "aarch64" ]; then
+        ido download_github_release jesseduffield/lazygit $tdir linux arm64
+    fi
+    ido tar -xzf $tdir/lazygit_*.tar.gz -C $tdir lazygit
+    ido sudo install $tdir/lazygit ~/.local/bin
+}
 
-install_yazi_by_binary() {
-    print -c blue "==== installing yazi by binary......"
+install_yazi() {
+    print -c blue "==== installing yazi..."
+    case "$PACKAGE_MANAGER" in
+        brew)
+            # ffmpegthumbnailer unar
+            ido brew update
+            ido brew install yazi ffmpeg sevenzip jq poppler fd ripgrep fzf zoxide imagemagick bat clipboard lazygit || die "failed to install yazi and deps"
+            print -c blue "==== yazi installed!"
+            return 0
+            ;;
+        apt)
+            ido sudo apt-get update
+            ido sudo apt-get install -y file || die "failed to install file"
+            ;;
+        apk)
+            ido apk update
+            ido apk add file || die "failed to install file"
+            ;;
+        opkg)
+            ido opkg update
+            ido opkg install file || die "failed to install file"
+            ;;
+        *)
+            die "Unsupported package manager: $PACKAGE_MANAGER"
+            ;;
+    esac
 
-    ido sudo apt-get update
     # apt要卸载： apt autoremove ffmpeg ffmpegthumbnailer unar fd-find ripgrep fzf bat
     # binary要安装： ffmpeg 7zip jq fd ripgrep fzf
-    # 必须： file jq git
-    ido sudo apt-get install -y file jq git poppler-utils || die "failed to install dependencies"
 
     download_yazi_binary || die "failed to download yazi binary"
     print -c blue "yazi installed to ~/.local/bin/yazi"
@@ -241,128 +249,155 @@ install_yazi_by_binary() {
     download_fzf_binary || die "failed to download fzf binary"
     print -c blue "fzf installed to ~/.local/bin/fzf"
 
+    print -c blue "installing zoxide by script..."
+    ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
+    # TODO: 清理zoxide安装脚本后的/tmp临时垃圾
+    print -c blue "zoxide installed to ~/.local/bin/zoxide"
+
     # TODO: imagemagick
 
     download_bat_binary || die "failed to download bat binary"
     print -c blue "bat installed to ~/.local/bin/bat"
-    
-    print -c blue "installing zoxide..."
-    ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
-    
-    # TODO: 清理zoxide安装脚本后的/tmp临时垃圾
 
-    print -c blue "zoxide installed to ~/.local/bin/zoxide"
+    # clipboard在vps上没必要，只需要在pc上安装即可，brew或者scoop
+    
+    download_lazygit_binary || die "failed to download lazygit binary"
+    print -c blue "lazygit installed to ~/.local/bin/lazygit"
 
-    print -c blue "==== yazi installed."
+    print -c blue "==== yazi installed!"
 }
 # ----------------------------------------------------------
 
-# -------------------------- nvim --------------------------
-install_nvim_by_brew() {
-    print -c blue "==== installing nvim by brew......"
-    ido brew install nvim rustup fd ripgrep || die "failed to install nvim and dependencies"
-    ido "brew install node@20 && brew link --overwrite node@20"
-    ido npm install -g neovim
-    ido pip install pynvim
-    print -c blue "==== nvim installed."
-}
-
-download_nvim_binary() {
-    ido sudo apt install libfuse2
+# -------------------------- lazyvim --------------------------
+download_nvim_appimage() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release neovim/neovim ~/.local/bin appimage -e sha256 -e zsync
+        ido download_github_release neovim/neovim $tdir appimage -e sha256 -e zsync
+        ido cp $tdir/nvim.appimage ~/.local/bin/nvim.appimage
     elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release matsuu/neovim-aarch64-appimage ~/.local/bin
-        ido cp ~/.local/bin/nvim-*-aarch64.appimage ~/.local/bin/nvim.appimage
+        ido download_github_release matsuu/neovim-aarch64-appimage $tdir
+        ido cp $tdir/nvim-*-aarch64.appimage ~/.local/bin/nvim.appimage
     fi
     ido "chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim"
 }
 
-install_nvim_by_binary() {
-    print -c blue "==== installing nvim by binary......"
-    download_nvim_binary || die "failed to download nvim binary"
-    print -c blue "nvim installed to ~/.local/bin/nvim"
-    ido sudo apt-get update
-    ido sudo apt-get install -y fd-find ripgrep || die "failed to install nvim dependencies"
-    ido "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -" || die "failed to setup nodejs repository"
-    ido sudo apt-get install -y nodejs || die "failed to install nodejs"
-    ido npm install -g neovim
-    ido pip install pynvim
-    print -c blue "==== nvim installed"
-}
-# ----------------------------------------------------------
-
-# -------------------------- lazygit --------------------------
-install_lazygit_by_brew() {
-    print -c blue "==== installing lazygit by brew......"
-    ido brew install lazygit
-    print -c blue "==== lazygit installed."
-}
-
-install_lazygit_by_binary() {
-    print -c blue "==== installing lazygit by binary......"
-    if [ "$arch" = "x86_64" ]; then
-        ido download_github_release jesseduffield/lazygit $tdir linux x86_64  # static
-    elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release jesseduffield/lazygit $tdir linux arm64
-    fi
-    ido tar -xzf $tdir/lazygit_*.tar.gz -C $tdir lazygit
-    ido sudo install $tdir/lazygit ~/.local/bin
-    print -c blue "lazygit installed to ~/.local/bin/lazygit"
-    print -c blue "==== lazygit installed."
-}
-# ----------------------------------------------------------
-
-# -------------------------- tmux --------------------------
-install_tmux_by_brew() {
-    print -c blue "==== installing tmux by brew......"
-    ido brew install tmux
-    print -c blue "==== tmux installed."
-}
-
-install_tmux_by_apt() {
-    print -c blue "==== installing tmux by apt......"
-    ido sudo apt-get update
-    ido sudo apt-get install -y tmux
-    print -c blue "==== tmux installed."
+install_lazyvim() {
+    print -c blue "==== installing lazyvim..."
+    case "$PACKAGE_MANAGER" in
+        brew)
+            # 已在yazi中安装了 lazygit fd ripgrep
+            ido brew update
+            ido brew install nvim node@20 || die "failed to install lazyvim and deps"
+            ido brew link --overwrite node@20
+            # 不确定需不需要
+            # ido npm install -g neovim
+            # ido pip install pynvim
+            ;;
+        apt)
+            ido sudo apt-get update
+            ido sudo apt-get install -y libfuse2 || die "failed to install libfuse2"
+            # TODO: 高于ubuntu24需要libfuse2t64，https://github.com/AppImage/AppImageKit/wiki/FUSE#type-2-appimage
+            download_nvim_appimage || die "failed to download nvim appimage"
+            print -c blue "nvim installed to ~/.local/bin/nvim"
+            ido "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -" || die "failed to setup nodejs repository"
+            ido sudo apt-get install -y nodejs || die "failed to install nodejs"
+            # ido npm install -g neovim
+            # ido pip install pynvim
+            ;;
+        apk)
+            ido apk update
+            ido apk add neovim nodejs npm || die "failed to install lazyvim and deps"
+            # ido npm install -g neovim
+            # ido pip install pynvim
+            ;;
+        opkg)
+            ido opkg update
+            # ido opkg install vim || die "failed to install file"
+            ;;
+        *)
+            die "Unsupported package manager: $PACKAGE_MANAGER"
+            ;;
+    esac
+    print -c blue "==== lazyvim installed!"
 }
 # ----------------------------------------------------------
 
 
-# -------------------------- starship --------------------------
-install_starship_by_brew() {
-    print -c blue "==== installing starship by brew......"
-    brew install starship
-    print -c blue "==== starship installed."
-}
-install_starship_by_binary() {
-    print -c blue "==== installing starship by binary......"
-    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
-    print -c blue "==== starship installed."
-}
-# ----------------------------------------------------------
 
-# -------------------------- btop --------------------------
-install_btop_by_brew() {
-    print -c blue "==== installing btop by brew......"
-    brew install btop
-    print -c blue "==== btop installed."
-}
-install_btop_by_binary() {
-    print -c blue "==== installing btop by binary......"
+# -------------------------- tools --------------------------
+download_btop_binary() {
     ido download_github_release aristocratos/btop $tdir linux $arch  # static
     ido tar -xjf $tdir/btop-*.tbz -C $tdir
     ido cp $tdir/btop/bin/btop ~/.local/bin/btop
-    ido mkdir -p ~/.config/btop
-    ido cp -r $tdir/btop/themes ~/.config/btop
-    print -c blue "btop installed to ~/.local/bin/btop"
-    print -c blue "==== btop installed."
+    ido chmod +x ~/.local/bin/btop
+    # ido mkdir -p ~/.config/btop
+    # ido cp -r $tdir/btop/themes ~/.config/btop
 }
 
-apt_prepare() {
-    print -c blue "requirements before installation"
-    ido sudo apt-get update
-    ido sudo apt-get install -y git build-essential curl jq python3-pip unzip bc || die "failed to install dependencies"
+install_tools() {
+    print -c blue "==== installing tools..."
+    case "$PACKAGE_MANAGER" in
+        brew)
+            ido brew update
+            ido brew install tmux || die "failed to install tmux"
+            ido brew install starship || die "failed to install starship"
+            ido brew install btop || die "failed to install btop"
+            ido kitten update-self
+            print -c blue "==== tools installed!"
+            return 0
+            ;;
+        apt)
+            ido sudo apt-get update
+            ido sudo apt-get install -y tmux || die "failed to install tmux"
+            ;;
+        apk)
+            ido apk update
+            ido apk add tmux || die "failed to install tmux"
+            ;;
+        opkg)
+            ido opkg update
+            ido opkg install tmux || die "failed to install tmux"
+            ;;
+        *)
+            die "Unsupported package manager: $PACKAGE_MANAGER"
+            ;;
+    esac
+
+    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
+
+    download_btop_binary || die "failed to download btop binary"
+    print -c blue "btop installed to ~/.local/bin/btop"
+    ido kitten update-self
+
+    print -c blue "==== tools installed!"
+}
+# ----------------------------------------------------------
+
+prepare() {
+    print -c blue "prepare requirements before installation..."
+    case "$PACKAGE_MANAGER" in
+        brew)
+            ido brew install curl wget git jq unzip || die "failed to install prepare deps"
+            ;;
+        apt)
+            ido sudo apt-get update
+            ido sudo apt-get install -y curl wget git jq unzip tar build-essential python3 python3-pip || die "failed to install prepare deps"
+            ;;
+        apk)
+            ido apk update
+            ido apk add bash curl wget git jq unzip tar || die "failed to install prepare deps"
+            ;;
+        opkg)
+            ido opkg update
+            # opkg不能随便升级，特别是curl wget
+            ido opkg install git jq unzip tar || die "failed to install prepare deps"
+            ;;
+        *)
+            die "Unsupported package manager: $PACKAGE_MANAGER"
+            ;;
+    esac
+    ido mkdir -p ~/.local/bin
+    ido mkdir -p ~/.config
+    print -c blue "prepare requirements installed!"
 }
 
 config() {
@@ -424,59 +459,33 @@ rc() {
 
 main() {
     print -c blue "---------- info ----------"
-    detect_os
+    detect_arch_os
     print -c blue "OS: $OS"
     print -c blue "arch: $arch"
     detect_network_tool
-    detect_brew
-    print -c blue "brew: $brew_installed"
-    detect_apt
-    print -c blue "apt: $apt_installed"
+    detect_package_manager
+    print -c blue "package manager: $PACKAGE_MANAGER"
+
     tdir=$(command mktemp -d "/tmp/config-install-XXXXXXXXXXXX")
     print -c blue "temp dir: $tdir"
     print -c blue "bin dir: ~/.local/bin"
+
     print -c blue "------- preparing -------"
-    if [ "$OS" = "macos" ]; then
-        if [ "$brew_installed" = true ]; then
-            print -c purple "using brew to install"
-            install_yazi_by_brew
-            install_nvim_by_brew
-            install_lazygit_by_brew
-            install_tmux_by_brew
-            install_starship_by_brew
-            install_btop_by_brew
-        else
-            die "brew is not installed"
-        fi
-    elif [ "$OS" = "linux" ]; then
-        if [ "$brew_installed" = true ]; then
-            print -c purple "using brew to install"
-            install_yazi_by_brew
-            install_nvim_by_brew
-            install_lazygit_by_brew
-            install_tmux_by_brew
-            install_starship_by_brew
-            install_btop_by_brew
-        elif [ "$apt_installed" = true ]; then
-            print -c purple "using apt and binaries to install"
-            apt_prepare
-            install_yazi_by_binary
-            install_nvim_by_binary
-            install_lazygit_by_binary
-            install_tmux_by_apt
-            install_starship_by_binary
-            install_btop_by_binary
-        else
-            die "brew and apt are not installed"
-        fi
-    fi
-    ido kitten update-self
+    prepare
+
+    print -c blue "------- installing -------"
+    install_yazi
+    install_lazyvim
+    install_tools
+    
     print -c blue "------- configuring -------"
     config
     rc
+
     print -c blue "------- cleaning -------"
     cleanup
-    print -c blue "done!"
+
+    print -c blue "------- done! -------"
     print -c blue "please run the following command to apply the changes:"
     print -c purple "source $CONFIG_FILE"
 }

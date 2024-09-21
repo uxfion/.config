@@ -14,20 +14,20 @@ print() {
     fi
 
     # Default color code for white, bold and underlined
-    local color_code="1;4;37"
+    local color_code="90"  # default to dark gray, no bold, no underline
 
     # Check for -c option and process it
     if [[ "$1" == "-c" ]] && [ -n "$2" ]; then
         # Adjust color code based on specified color
         case "$2" in
-            black) color_code="1;4;30" ;;
-            red) color_code="1;4;31" ;;
-            green) color_code="1;4;32" ;;
-            yellow) color_code="1;4;33" ;;
-            blue) color_code="1;4;34" ;;
-            purple) color_code="1;4;35" ;;
-            cyan) color_code="1;4;36" ;;
-            white) color_code="1;4;37" ;;
+            black) color_code="30" ;;
+            red) color_code="31" ;;
+            green) color_code="32" ;;
+            yellow) color_code="33" ;;
+            blue) color_code="34" ;;
+            purple) color_code="35" ;;
+            cyan) color_code="36" ;;
+            white) color_code="37" ;;
             *)
                 echo "Unsupported color: $2"
                 return

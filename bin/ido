@@ -2,7 +2,7 @@
 
 ido() {
     # 打印命令使用 cyan 颜色
-    print -c cyan "$*"
+    print "$*"
 
     # 执行命令
     # "$@"
