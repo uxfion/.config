@@ -445,7 +445,7 @@ rc() {
         CONFIG_FILE="$HOME/.zshrc"
     elif [ "$SHELL" = "/bin/bash" ]; then
         CONFIG_FILE="$HOME/.bashrc"
-    # TODO: sh 不支持
+    # TODO: sh 不支持，有报错
     else
         print -c purple "unsupported shell type: $SHELL"
         print -c purple "\$0: $0"

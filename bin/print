@@ -14,7 +14,7 @@ print() {
     fi
 
     # Default color code for white, bold and underlined
-    local color_code="90"  # default to dark gray, no bold, no underline
+    local color_code="37"
 
     # Check for -c option and process it
     if [[ "$1" == "-c" ]] && [ -n "$2" ]; then
@@ -28,6 +28,8 @@ print() {
             purple) color_code="35" ;;
             cyan) color_code="36" ;;
             white) color_code="37" ;;
+            gray) color_code="90" ;;
+            # TODO: 蓝色和紫色有点问题，需要调整
             *)
                 echo "Unsupported color: $2"
                 return
@@ -46,3 +48,4 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     print "$@"
 fi
 
+# TODO: zsh print被覆盖
