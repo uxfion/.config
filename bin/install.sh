@@ -147,9 +147,9 @@ download_ripgrep_binary() {
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release BurntSushi/ripgrep $tdir linux aarch64 gnu -e sha256  # arm64只有gnu的，没有musl
     fi
-    ido tar -xzf $tdir/fd-*.tar.gz -C $tdir
-    ido cp $tdir/fd-*/fd ~/.local/bin/fd
-    ido chmod +x ~/.local/bin/fd
+    ido tar -xzf $tdir/ripgrep-*.tar.gz -C $tdir
+    ido cp $tdir/ripgrep-*/rg ~/.local/bin/rg
+    ido chmod +x ~/.local/bin/rg
 }
 
 download_fzf_binary() {
