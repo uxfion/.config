@@ -76,7 +76,7 @@ detect_package_manager() {
     else
         die "No supported package manager found"
     fi
-    print -c green "Package Manager: $PACKAGE_MANAGER"
+    # print -c green "Package Manager: $PACKAGE_MANAGER"
 }
 
 # -------------------------- yazi --------------------------
@@ -394,8 +394,12 @@ install_tools() {
             ;;
     esac
 
-    # TODO: openwrt安装starship失败
-    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
+    # 如果是opkg，跳过安装starship，并提示skipping
+    if [ "$PACKAGE_MANAGER" = "opkg" ]; then
+        print -c purple "skipping starship installation on openwrt"
+    else
+        ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
+    fi
 
     download_btop_binary || die "failed to download btop binary"
     print -c green "btop installed to ~/.local/bin/btop"
@@ -511,7 +515,7 @@ main() {
 
     tdir=$(command mktemp -d "/tmp/config-install-XXXXXXXXXXXX")
     print -c green "temp dir: $tdir"
-    print -c green "bin dir: ~/.local/bin"
+    print -c green "bin dir: $HOME/.local/bin"
 
     print -c green "------- preparing -------"
     prepare
