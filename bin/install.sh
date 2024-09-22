@@ -494,11 +494,9 @@ rc() {
             RC_FILE="$HOME/.bashrc"
             ;;
         *)
-            print -c purple "Unsupported shell type:"
-            print -c purple "\$SHELL: $SHELL"
-            print -c purple "\$0: $0"
+            print -c purple "Unsupported shell type: \$SHELL -> $SHELL \$0 -> $0"
             print -c purple "please add the following line to your shell rc file manually, and source it:"
-            print -c purple "$LINE_TO_ADD"
+            print -c cyan "$LINE_TO_ADD"
 
             return 1
             ;;
@@ -512,7 +510,7 @@ rc() {
     if grep -qF -- "source ~/.config/myrc.sh" "$RC_FILE"; then
         print -c green "myrc.sh exists in $RC_FILE, no need to add."
     else
-        ido "echo -e "$LINE_TO_ADD" >> $RC_FILE"
+        ido "echo -e $LINE_TO_ADD >> $RC_FILE"
         print -c green "added myrc.sh to $RC_FILE"
     fi
     print -c green "please run the following command to apply the changes:"
