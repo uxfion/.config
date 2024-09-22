@@ -9,7 +9,7 @@ tdir=''
 cleanup() {
     [ -n "$tdir" ] && {
         command rm -rf "$tdir"
-        print -c purple "cleaned up temp dir $tdir"
+        print -c green "cleaned up temp dir $tdir"
         tdir=''
     }
 }
@@ -82,7 +82,7 @@ detect_package_manager() {
 # -------------------------- yazi --------------------------
 download_yazi_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release sxyazi/yazi $tdir linux x86 musl
+        ido download_github_release sxyazi/yazi $tdir linux x86_64 musl
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release sxyazi/yazi $tdir linux aarch64 musl
     fi
@@ -132,7 +132,7 @@ download_jq_binary() {
 
 download_fd_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release sharkdp/fd $tdir linux x86 musl  # static
+        ido download_github_release sharkdp/fd $tdir linux x86_64 musl  # static
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release sharkdp/fd $tdir linux aarch64 musl
     fi
@@ -143,7 +143,7 @@ download_fd_binary() {
 
 download_ripgrep_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release BurntSushi/ripgrep $tdir linux x86 musl -e sha256  # static
+        ido download_github_release BurntSushi/ripgrep $tdir linux x86_64 musl -e sha256  # static
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release BurntSushi/ripgrep $tdir linux aarch64 gnu -e sha256  # arm64只有gnu的，没有musl
     fi
@@ -177,9 +177,9 @@ download_fzf_binary() {
 
 download_bat_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release sharkdp/bat $tdir linux x86 musl  # static
+        ido download_github_release sharkdp/bat $tdir linux x86_64 musl  # static
     elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release sharkdp/bat $tdir linux aarch64 musl
+        ido download_github_release sharkdp/bat $tdir linux aarch64  # 只有gnu的，没有musl
     fi
     ido tar -xzf $tdir/bat-*.tar.gz -C $tdir
     ido cp $tdir/bat-*/bat ~/.local/bin/bat
@@ -195,6 +195,13 @@ download_lazygit_binary() {
     ido tar -xzf $tdir/lazygit_*.tar.gz -C $tdir lazygit
     ido cp $tdir/lazygit ~/.local/bin/lazygit
     ido chmod +x ~/.local/bin/lazygit
+}
+
+download_zoxide_script() {
+    print -c green "installing zoxide by script..."
+    ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
+    find /tmp -type d -name 'tmp.*' -prune -exec sh -c '[ -f "$1/zoxide" ] || [ -z "$(ls -A "$1")" ] && rm -rf "$1" && echo "Deleted: $1"' _ {} \;  # 删除包含 zoxide 文件的目录，以及那些空的 tmp.XXX 开头的目录
+    print -c green "cleaned up zoxide tmp dirs"
 }
 
 install_yazi() {
@@ -250,9 +257,7 @@ install_yazi() {
     download_fzf_binary || die "failed to download fzf binary"
     print -c green "fzf installed to ~/.local/bin/fzf"
 
-    print -c green "installing zoxide by script..."
-    ido "curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh" || die "failed to install zoxide"
-    # TODO: 清理zoxide安装脚本后的/tmp临时垃圾
+    download_zoxide_script || die "failed to install zoxide"
     print -c green "zoxide installed to ~/.local/bin/zoxide"
 
     # TODO: imagemagick
@@ -326,12 +331,38 @@ install_lazyvim() {
 
 # -------------------------- tools --------------------------
 download_btop_binary() {
-    ido download_github_release aristocratos/btop $tdir linux $arch  # static
+    if [ "$arch" = "x86_64" ]; then
+        ido download_github_release aristocratos/btop $tdir linux x86_64  # static
+    elif [ "$arch" = "aarch64" ]; then
+        ido download_github_release aristocratos/btop $tdir linux aarch64  # static
+    fi
     ido tar -xjf $tdir/btop-*.tbz -C $tdir
     ido cp $tdir/btop/bin/btop ~/.local/bin/btop
     ido chmod +x ~/.local/bin/btop
     # ido mkdir -p ~/.config/btop
     # ido cp -r $tdir/btop/themes ~/.config/btop
+}
+
+download_xh_binary() {
+    if [ "$arch" = "x86_64" ]; then
+        ido download_github_release ducaale/xh $tdir linux x86_64  # static
+    elif [ "$arch" = "aarch64" ]; then
+        ido download_github_release ducaale/xh $tdir linux aarch64  # static
+    fi
+    ido tar -xzf $tdir/xh-*.tar.gz -C $tdir
+    ido cp $tdir/xh-*/xh ~/.local/bin/xh
+    ido chmod +x ~/.local/bin/xh
+}
+
+download_lazydocker_binary() {
+    if [ "$arch" = "x86_64" ]; then
+        ido download_github_release jesseduffield/lazydocker $tdir linux x86_64
+    elif [ "$arch" = "aarch64" ]; then
+        ido download_github_release jesseduffield/lazydocker $tdir linux arm64
+    fi
+    ido tar -xzf $tdir/lazydocker_*.tar.gz -C $tdir lazydocker  # 提取出来没有文件夹，所以只提取bin
+    ido cp $tdir/lazydocker ~/.local/bin/lazydocker
+    ido chmod +x ~/.local/bin/lazydocker
 }
 
 install_tools() {
@@ -369,7 +400,13 @@ install_tools() {
     download_btop_binary || die "failed to download btop binary"
     print -c green "btop installed to ~/.local/bin/btop"
 
-    # TODO: xh, neofetch(?), lazydocker(?), iftop(?)
+    download_xh_binary || die "failed to download xh binary"
+    print -c green "xh installed to ~/.local/bin/xh"
+
+    download_lazydocker_binary || die "failed to download lazydocker binary"
+    print -c green "lazydocker installed to ~/.local/bin/lazydocker"
+
+    # TODO: neofetch(?), iftop(?)
 
     ido kitten update-self
     print -c green "==== tools installed!"
@@ -412,7 +449,7 @@ config() {
 
     # 检查 ~/.config 目录是否存在
     if [ ! -d "$CONFIG_DIR" ]; then
-        print -c purple "directory $CONFIG_DIR does not exist, creating"
+        print -c green "directory $CONFIG_DIR does not exist, creating"
         ido mkdir -p $CONFIG_DIR
     fi
 
