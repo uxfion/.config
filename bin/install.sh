@@ -486,22 +486,37 @@ config() {
 rc() {
     LINE_TO_ADD="if [ -f ~/.config/myrc.sh ]; then\n    source ~/.config/myrc.sh\nfi"
 
-    if [ "$SHELL" = "/bin/zsh" ]; then
-        CONFIG_FILE="$HOME/.zshrc"
-    elif [ "$SHELL" = "/bin/bash" ]; then
-        CONFIG_FILE="$HOME/.bashrc"
-    # TODO: sh 不支持，有报错
-    else
-        print -c purple "unsupported shell type: $SHELL"
-        print -c purple "\$0: $0"
+    case "$SHELL" in
+        *zsh)
+            RC_FILE="$HOME/.zshrc"
+            ;;
+        *bash)
+            RC_FILE="$HOME/.bashrc"
+            ;;
+        *)
+            print -c purple "Unsupported shell type:"
+            print -c purple "\$SHELL: $SHELL"
+            print -c purple "\$0: $0"
+            print -c purple "please add the following line to your shell rc file manually, and source it:"
+            print -c purple "$LINE_TO_ADD"
+
+            return 1
+            ;;
+    esac
+
+    if [ ! -f "$RC_FILE" ]; then
+        print -c green "$RC_FILE does not exist. Creating it."
+        ido touch $RC_FILE
     fi
 
-    if grep -qF -- "source ~/.config/myrc.sh" "$CONFIG_FILE"; then
-        print -c green "myrc.sh exists in $CONFIG_FILE, no need to add."
+    if grep -qF -- "source ~/.config/myrc.sh" "$RC_FILE"; then
+        print -c green "myrc.sh exists in $RC_FILE, no need to add."
     else
-        ido "echo -e "$LINE_TO_ADD" >> $CONFIG_FILE"
-        print -c green "added myrc.sh to $CONFIG_FILE"
+        ido "echo -e "$LINE_TO_ADD" >> $RC_FILE"
+        print -c green "added myrc.sh to $RC_FILE"
     fi
+    print -c green "please run the following command to apply the changes:"
+    print -c purple "source $RC_FILE"
 }
 
 main() {
@@ -533,8 +548,6 @@ main() {
     cleanup
 
     print -c green "------- done! -------"
-    print -c green "please run the following command to apply the changes:"
-    print -c purple "source $CONFIG_FILE"
 }
 
 main "$@"
