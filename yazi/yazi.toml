@@ -24,3 +24,8 @@ prepend_previewers = [
 prepend_preloaders = [
     { mime = "video/*", run = "video-ffmpeg" },
 ]
+
+prepend_fetchers = [
+    { id = "git", name = "*", run = "git" },
+]
+
