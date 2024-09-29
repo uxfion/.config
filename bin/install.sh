@@ -496,7 +496,17 @@ rc() {
         *)
             print -c purple "Unsupported shell type: \$SHELL -> $SHELL \$0 -> $0"
             print -c purple "please add the following line to your shell rc file manually, and source it:"
-            print -c cyan "$LINE_TO_ADD"
+            # print -c cyan "$LINE_TO_ADD"
+            print -c cyan '''\n
+cat << EOF >> ~/.bashrc
+if [ -f ~/.config/myrc.sh ]; then
+    source ~/.config/myrc.sh
+fi
+EOF
+\n
+source ~/.bashrc
+\n
+'''
 
             return 1
             ;;
