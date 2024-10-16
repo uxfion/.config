@@ -370,20 +370,20 @@ install_tools() {
     case "$PACKAGE_MANAGER" in
         brew)
             ido brew update
-            ido brew install tmux || die "failed to install tmux"
-            ido brew install starship || die "failed to install starship"
-            ido brew install btop || die "failed to install btop"
+            ido brew install tmux reptyr starship btop xh || die "failed to install tools"
+            ido brew install lazydocker || die "failed to install lazydocker"
             ido kitten update-self
             print -c green "==== tools installed!"
             return 0
+            # brew到这里结束，不走下去
             ;;
         apt)
             ido sudo apt-get update
-            ido sudo apt-get install -y tmux || die "failed to install tmux"
+            ido sudo apt-get install -y tmux reptyr || die "failed to install tmux"
             ;;
         apk)
             ido apk update
-            ido apk add tmux || die "failed to install tmux"
+            ido apk add tmux reptyr || die "failed to install tmux"
             ;;
         opkg)
             ido opkg update
