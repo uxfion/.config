@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # 使用 ps aux 列出所有进程，并通过 fzf 进行选择
-selected=$(ps aux | fzf --layout=reverse --height=40% --border --prompt="Select a process: ")
+selected=$(ps aux | fzf --layout=reverse --height=40% --border --prompt="Select a process to attach: ")
 
 # 如果用户选择了一个进程，则提取该进程的 PID
 if [[ -n "$selected" ]]; then
@@ -9,7 +9,7 @@ if [[ -n "$selected" ]]; then
     pid=$(echo $selected | awk '{print $2}')
 
     # 将该进程附加到当前终端
-    sudo reptyr -T $pid
+    reptyr -T $pid
 else
     echo "No process selected."
 fi

@@ -102,4 +102,4 @@ if [ -d "$HOME/.local/share/kitty-ssh-kitten/kitty/bin" ] && [[ ":$PATH:" != *":
     export PATH="$PATH:$HOME/.local/share/kitty-ssh-kitten/kitty/bin"
 fi
 
-bind -x '"\C-p": "~/.config/bin/attact_procss"'
+bind -x '"\C-p": "~/.config/bin/attach_process"'
