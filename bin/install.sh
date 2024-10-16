@@ -370,7 +370,8 @@ install_tools() {
     case "$PACKAGE_MANAGER" in
         brew)
             ido brew update
-            ido brew install tmux reptyr starship btop xh || die "failed to install tools"
+            # brew don't have reptyr
+            ido brew install tmux starship btop xh || die "failed to install tools"
             ido brew install lazydocker || die "failed to install lazydocker"
             ido kitten update-self
             print -c green "==== tools installed!"
