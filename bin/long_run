@@ -1,0 +1,16 @@
+#!/bin/bash
+
+# 检查是否传入了参数
+if [ -z "$1" ]; then
+  echo "Usage: $0 <number>"
+  exit 1
+fi
+
+# 读取参数
+number=$1
+
+# 输出从 1 到 number 的数字，每秒一个
+for ((i=1; i<=number; i++)); do
+  echo $i
+  sleep 1
+done

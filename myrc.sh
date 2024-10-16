@@ -13,6 +13,7 @@ fi
 
 # alias dc='docker compose'
 # 改为自动检测
+# TODO: 有些场景好像有问题，待反馈
 if docker compose version &> /dev/null; then
     alias dc='docker compose'
 else
@@ -93,6 +94,12 @@ show_path() {
     echo $PATH | tr ':' '\n'
 }
 
+show_size() {
+    du -sh ./* ./.??* 2>/dev/null | sort -rh
+}
+
 if [ -d "$HOME/.local/share/kitty-ssh-kitten/kitty/bin" ] && [[ ":$PATH:" != *":$HOME/.local/share/kitty-ssh-kitten/kitty/bin:"* ]]; then
     export PATH="$PATH:$HOME/.local/share/kitty-ssh-kitten/kitty/bin"
 fi
+
+bind -x '"\C-p": "~/.config/bin/attact_procss"'
