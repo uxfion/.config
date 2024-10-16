@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# 使用 ps aux 列出所有进程，并通过 fzf 进行选择
+selected=$(ps aux | fzf --layout=reverse --height=40% --border --prompt="Select a process: ")
+
+# 如果用户选择了一个进程，则提取该进程的 PID
+if [[ -n "$selected" ]]; then
+    # 提取 PID（第二列）
+    pid=$(echo $selected | awk '{print $2}')
+    
+    # 询问用户选择的操作：附加、终止、暂停、恢复、调整优先级
+    echo "Select an action for the process (PID: $pid):"
+    echo "a) Attach to process"
+    echo "k) Kill process"
+    echo "s) Pause process"
+    echo "r) Resume process"
+    echo "p) Renice process"
+    echo "o) Show open files (lsof)"
+    echo "t) Open a tmux session and attach"
+    read -p "Enter your choice (a/k/s/r/p/o/t): " action
+
+    # 根据用户的选择执行相应操作
+    case $action in
+        a)
+            # 附加到进程
+            sudo reptyr -T $pid
+            ;;
+        k)
+            # 终止进程
+            kill -9 $pid
+            echo "Process $pid has been terminated."
+            ;;
+        s)
+            # 暂停进程
+            kill -STOP $pid
+            echo "Process $pid has been paused."
+            ;;
+        r)
+            # 恢复进程
+            kill -CONT $pid
+            echo "Process $pid has been resumed."
+            ;;
+        p)
+            # 调整进程优先级
+            read -p "Enter new priority (lower is higher priority): " priority
+            sudo renice $priority -p $pid
+            ;;
+        o)
+            # 查看进程打开的文件
+            lsof -p $pid
+            ;;
+        t)
+            # 打开一个 tmux 会话并附加
+            tmux new-session -s "tmp_$pid" "reptyr -T $pid"
+            ;;
+        *)
+            echo "Invalid choice. No action taken."
+            ;;
+    esac
+else
+    echo "No process selected."
+fi
+
