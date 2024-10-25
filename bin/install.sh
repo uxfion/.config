@@ -485,7 +485,9 @@ config() {
 }
 
 rc() {
-    LINE_TO_ADD="if [ -f ~/.config/myrc.sh ]; then\n    source ~/.config/myrc.sh\nfi"
+    LINE_TO_ADD='if [ -f ~/.config/myrc.sh ]; then
+    source ~/.config/myrc.sh
+fi'
 
     case "$SHELL" in
         *zsh)
@@ -497,18 +499,13 @@ rc() {
         *)
             print -c purple "Unsupported shell type: \$SHELL -> $SHELL \$0 -> $0"
             print -c purple "please add the following line to your shell rc file manually, and source it:"
-            # print -c cyan "$LINE_TO_ADD"
-            print -c cyan '''\n
+            print -c cyan "\n
 cat << EOF >> ~/.bashrc
-if [ -f ~/.config/myrc.sh ]; then
-    source ~/.config/myrc.sh
-fi
+$LINE_TO_ADD
 EOF
-\n
-source ~/.bashrc
-\n
-'''
 
+source ~/.bashrc
+\n"
             return 1
             ;;
     esac
@@ -521,7 +518,9 @@ source ~/.bashrc
     if grep -qF -- "source ~/.config/myrc.sh" "$RC_FILE"; then
         print -c green "myrc.sh exists in $RC_FILE, no need to add."
     else
-        ido "echo -e $LINE_TO_ADD >> $RC_FILE"
+        ido "cat << EOF >> $RC_FILE
+$LINE_TO_ADD
+EOF"
         print -c green "added myrc.sh to $RC_FILE"
     fi
     print -c green "please run the following command to apply the changes:"
