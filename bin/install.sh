@@ -330,6 +330,18 @@ install_lazyvim() {
 
 
 # -------------------------- tools --------------------------
+download_tmux_appimage() {
+    if [ "$arch" = "x86_64" ]; then
+        ido download_github_release nelsonenzo/tmux-appimage $tdir appimage
+        ido cp $tdir/tmux.appimage ~/.local/bin/tmux.appimage
+    elif [ "$arch" = "aarch64" ]; then
+        # TODO: arm64 tmux
+        print -c purple "no arm64 tmux appimage provided, skipping..."
+        return 0
+    fi
+    ido "chmod +x ~/.local/bin/tmux.appimage && ln -sf ~/.local/bin/tmux.appimage ~/.local/bin/tmux"
+}
+
 download_btop_binary() {
     if [ "$arch" = "x86_64" ]; then
         ido download_github_release aristocratos/btop $tdir linux x86_64  # static
@@ -380,11 +392,12 @@ install_tools() {
             ;;
         apt)
             ido sudo apt-get update
-            ido sudo apt-get install -y tmux reptyr || die "failed to install tmux"
+            ido sudo apt-get install -y reptyr || die "failed to install reptyr"
+            download_tmux_appimage || die "failed to download tmux"
             ;;
         apk)
             ido apk update
-            ido apk add tmux reptyr || die "failed to install tmux"
+            ido apk add tmux reptyr || die "failed to install tmux and reptyr"
             ;;
         opkg)
             ido opkg update
