@@ -392,7 +392,8 @@ install_tools() {
             ;;
         apt)
             ido sudo apt-get update
-            ido sudo apt-get install -y reptyr || die "failed to install reptyr"
+            # TODO: arm64 ubuntu没有reptyr
+            # ido sudo apt-get install -y reptyr || die "failed to install reptyr"
             download_tmux_appimage || die "failed to download tmux"
             ;;
         apk)
