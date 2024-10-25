@@ -1,6 +1,8 @@
 [manager]
 prepend_keymap = [
-    { on = [ "T" ], run = "plugin --sync max-preview" },
+  { on = [ "T" ], run = "plugin --sync max-preview" },
+  { on = [ "c", "h" ], run = "plugin --sync hide-preview" },
+
 	{ on = [ "<C-s>" ], run = 'shell "$SHELL" --block --confirm', desc = "shell" },
 	{ on = [ "<C-g>" ], run = 'shell lazygit --block --confirm', desc = "lazygit" },
 
