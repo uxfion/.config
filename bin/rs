@@ -1,0 +1,120 @@
+#!/bin/bash
+
+# rs - A convenient wrapper for rsync
+# Can be both executed directly and sourced
+# Usage: rs [operation] [options] source destination
+
+rs() {
+    # Function to print usage
+    print_usage() {
+        cat << EOF
+RS - A convenient wrapper for rsync
+
+Usage: rs [operation] [options] source destination
+
+Operations:
+    copy    Synchronize files (rsync -avzP)
+    move    Synchronize and remove source files (rsync --remove-source-files)
+
+Options:
+    -h      Show this help message
+    -np     Ignore permissions, owner and group
+    -pw     Use password file (followed by password file path)
+
+Examples:
+    rs copy /source/path/ /dest/path/
+    rs move -np /source/path/ /dest/path/
+    rs copy -pw ./rsync.passwd local.file server::module/path/
+    rs copy local.file remote:/path/
+EOF
+    }
+
+    # Show help if no arguments or -h
+    if [ $# -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        print_usage
+        return 0
+    fi
+
+    # Initialize variables
+    local operation=""
+    local rsync_opts="-avzP"
+    local source=""
+    local destination=""
+    local args=("$@")  # Store all arguments in an array
+    local i=0
+
+    # Parse operation (first argument)
+    if [ "${args[0]}" == "copy" ] || [ "${args[0]}" == "move" ]; then
+        operation="${args[0]}"
+        ((i++))
+    else
+        echo "Error: First argument must be 'copy' or 'move'"
+        print_usage
+        return 1
+    fi
+
+    # Parse options and collect source/destination
+    while [ $i -lt ${#args[@]} ]; do
+        case "${args[i]}" in
+            -np)
+                rsync_opts="$rsync_opts --no-perms --no-owner --no-group"
+                ;;
+            -pw)
+                ((i++))
+                if [ $i -lt ${#args[@]} ]; then
+                    rsync_opts="$rsync_opts --password-file=${args[i]}"
+                else
+                    echo "Error: -pw option requires a password file path"
+                    print_usage
+                    return 1
+                fi
+                ;;
+            *)
+                if [ -z "$source" ]; then
+                    source="${args[i]}"
+                elif [ -z "$destination" ]; then
+                    destination="${args[i]}"
+                else
+                    echo "Error: Unexpected argument '${args[i]}'"
+                    print_usage
+                    return 1
+                fi
+                ;;
+        esac
+        ((i++))
+    done
+
+    # Verify source and destination are provided
+    if [ -z "$source" ] || [ -z "$destination" ]; then
+        echo "Error: Both source and destination must be specified"
+        print_usage
+        return 1
+    fi
+
+    # Add remove-source-files option for move operation
+    if [ "$operation" == "move" ]; then
+        rsync_opts="$rsync_opts --remove-source-files"
+    fi
+
+    # Print the command that will be executed (uncomment for debugging)
+    # echo "Executing: rsync $rsync_opts '$source' '$destination'"
+
+    # Execute rsync command
+    rsync $rsync_opts "$source" "$destination"
+    local status=$?
+
+    # Check rsync exit status
+    if [ $status -eq 0 ]; then
+        echo "Operation completed successfully"
+        return 0
+    else
+        echo "Operation failed with exit code $status"
+        return $status
+    fi
+}
+
+# If the script is being executed directly (not sourced),
+# run the function with all arguments
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    rs "$@"
+fi

@@ -1,0 +1,184 @@
+#!/bin/bash
+
+# rc - A convenient wrapper for rclone
+# Can be both executed directly and sourced
+
+rc() {
+    # Function to print usage
+    print_usage() {
+        cat << EOF
+RC - A convenient wrapper for rclone
+
+Usage: rc [operation] [options] source destination
+
+Operations:
+    copy    Copy files (rclone copy)
+    move    Move files (rclone move)
+    sync    Sync directories (rclone sync)
+    ls      List contents (rclone ls)
+    lsd     List directories (rclone lsd)
+    size    Show total size (rclone size)
+    check   Check files (rclone check)
+
+Options:
+    -h      Show this help message
+    -t N    Set number of transfers (--transfers N)
+    -np     Dry run, no changes made (--dry-run)
+    -v      Verbose output (--verbose)
+    -q      Quiet output (--quiet) and disable progress
+    -f      Filter file (followed by filter file path)
+    -c      Copy contents only (don't create parent directory)
+
+Examples:
+    rc ls gdrive:                         # List files in Google Drive
+    rc copy -t 8 local/ gdrive:backup/    # Copy directory to backup/local/
+    rc copy -c local/ gdrive:backup/      # Copy only contents to backup/
+    rc sync -np docs/ gdrive:docs/        # Dry-run sync
+    rc size gdrive:backup/                # Show total size
+    rc check local/ gdrive:backup/        # Compare files
+    rc move -t 16 downloads/ od:archive/  # Move directory to archive/downloads/
+
+Note: 
+- Progress (-P) is enabled by default unless -q is used
+- By default, source directory will be created in destination (rsync-like behavior)
+- Use -c to copy only contents (original rclone behavior)
+- Remotes should be configured using 'rclone config' first
+EOF
+    }
+
+    # Show help if no arguments or -h
+    if [ $# -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        print_usage
+        return 0
+    fi
+
+    # Initialize variables
+    local operation=""
+    local rclone_opts="--progress --stats 1s"  # Default options
+    local source=""
+    local destination=""
+    local args=("$@")
+    local i=0
+    local need_dest=true
+    local contents_only=false
+
+    # Parse operation (first argument)
+    case "${args[0]}" in
+        copy|move|sync|check)
+            operation="${args[0]}"
+            ;;
+        ls|lsd|size)
+            operation="${args[0]}"
+            need_dest=false
+            rclone_opts=""  # No progress needed for these operations
+            ;;
+        *)
+            echo "Error: Invalid operation '${args[0]}'"
+            print_usage
+            return 1
+            ;;
+    esac
+    ((i++))
+
+    # Parse options and collect source/destination
+    while [ $i -lt ${#args[@]} ]; do
+        case "${args[i]}" in
+            -t)
+                ((i++))
+                if [ $i -lt ${#args[@]} ] && [[ "${args[i]}" =~ ^[0-9]+$ ]]; then
+                    rclone_opts="$rclone_opts --transfers ${args[i]}"
+                else
+                    echo "Error: -t requires a number"
+                    print_usage
+                    return 1
+                fi
+                ;;
+            -c)
+                contents_only=true
+                ;;
+            -np)
+                rclone_opts="$rclone_opts --dry-run"
+                ;;
+            -v)
+                rclone_opts="$rclone_opts --verbose"
+                ;;
+            -q)
+                rclone_opts=""  # Remove progress for quiet mode
+                rclone_opts="$rclone_opts --quiet"
+                ;;
+            -f)
+                ((i++))
+                if [ $i -lt ${#args[@]} ]; then
+                    rclone_opts="$rclone_opts --filter-from ${args[i]}"
+                else
+                    echo "Error: -f option requires a filter file path"
+                    print_usage
+                    return 1
+                fi
+                ;;
+            *)
+                if [ -z "$source" ]; then
+                    source="${args[i]}"
+                elif [ -z "$destination" ] && [ "$need_dest" = true ]; then
+                    destination="${args[i]}"
+                else
+                    echo "Error: Unexpected argument '${args[i]}'"
+                    print_usage
+                    return 1
+                fi
+                ;;
+        esac
+        ((i++))
+    done
+
+    # Verify required arguments
+    if [ -z "$source" ]; then
+        echo "Error: Source must be specified"
+        print_usage
+        return 1
+    fi
+    
+    if [ "$need_dest" = true ] && [ -z "$destination" ]; then
+        echo "Error: Destination must be specified for $operation operation"
+        print_usage
+        return 1
+    fi
+
+    # Handle directory behavior for copy/move/sync operations
+    if [[ "$operation" =~ ^(copy|move|sync)$ ]] && [ "$contents_only" = false ] && [ -d "$source" ]; then
+        # Remove trailing slash from source if present
+        source="${source%/}"
+        # Get the base name of the source directory
+        local dirname=$(basename "$source")
+        # Append the directory name to the destination
+        destination="${destination%/}/$dirname"
+    fi
+
+    # Build and execute command
+    local cmd="rclone $operation $rclone_opts $source"
+    if [ "$need_dest" = true ]; then
+        cmd="$cmd $destination"
+    fi
+
+    # Print the command that will be executed (uncomment for debugging)
+    # echo "Executing: $cmd"
+
+    # Execute command
+    eval "$cmd"
+    local status=$?
+
+    # Check exit status
+    if [ $status -eq 0 ]; then
+        echo "Operation completed successfully"
+        return 0
+    else
+        echo "Operation failed with exit code $status"
+        return $status
+    fi
+}
+
+# If the script is being executed directly (not sourced),
+# run the function with all arguments
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    rc "$@"
+fi
