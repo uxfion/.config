@@ -26,6 +26,8 @@ Examples:
     rs move -np /source/path/ /dest/path/
     rs copy -pw ./rsync.passwd local.file server::module/path/
     rs copy local.file remote:/path/
+    rs move *.txt remote:/backup/        # Support wildcards
+    rs copy -pw rsync.passwd file* server::module/path/
 EOF
     }
 
@@ -38,10 +40,11 @@ EOF
     # Initialize variables
     local operation=""
     local rsync_opts="-avzP"
-    local source=""
+    local sources=()
     local destination=""
-    local args=("$@")  # Store all arguments in an array
+    local args=("$@")
     local i=0
+    local parsing_sources=false
 
     # Parse operation (first argument)
     if [ "${args[0]}" == "copy" ] || [ "${args[0]}" == "move" ]; then
@@ -53,16 +56,18 @@ EOF
         return 1
     fi
 
-    # Parse options and collect source/destination
+    # First pass: parse options
     while [ $i -lt ${#args[@]} ]; do
         case "${args[i]}" in
             -np)
                 rsync_opts="$rsync_opts --no-perms --no-owner --no-group"
+                ((i++))
                 ;;
             -pw)
                 ((i++))
                 if [ $i -lt ${#args[@]} ]; then
                     rsync_opts="$rsync_opts --password-file=${args[i]}"
+                    ((i++))
                 else
                     echo "Error: -pw option requires a password file path"
                     print_usage
@@ -70,23 +75,27 @@ EOF
                 fi
                 ;;
             *)
-                if [ -z "$source" ]; then
-                    source="${args[i]}"
-                elif [ -z "$destination" ]; then
-                    destination="${args[i]}"
-                else
-                    echo "Error: Unexpected argument '${args[i]}'"
-                    print_usage
-                    return 1
-                fi
+                # Start collecting sources
+                break
                 ;;
         esac
+    done
+
+    # Second pass: collect all remaining arguments except the last as sources
+    local last_idx=$((${#args[@]} - 1))
+    while [ $i -lt $last_idx ]; do
+        sources+=("${args[i]}")
         ((i++))
     done
 
-    # Verify source and destination are provided
-    if [ -z "$source" ] || [ -z "$destination" ]; then
-        echo "Error: Both source and destination must be specified"
+    # The last argument is the destination
+    if [ $i -eq $last_idx ]; then
+        destination="${args[i]}"
+    fi
+
+    # Verify we have sources and destination
+    if [ ${#sources[@]} -eq 0 ] || [ -z "$destination" ]; then
+        echo "Error: Both source(s) and destination must be specified"
         print_usage
         return 1
     fi
@@ -96,11 +105,23 @@ EOF
         rsync_opts="$rsync_opts --remove-source-files"
     fi
 
-    # Print the command that will be executed (uncomment for debugging)
-    # echo "Executing: rsync $rsync_opts '$source' '$destination'"
+    # Build and execute command
+    # Start with the basic command
+    local cmd="rsync $rsync_opts"
+    
+    # Add each source to the command
+    for src in "${sources[@]}"; do
+        cmd="$cmd '$src'"
+    done
+    
+    # Add the destination
+    cmd="$cmd '$destination'"
 
-    # Execute rsync command
-    rsync $rsync_opts "$source" "$destination"
+    # Print the command that will be executed (uncomment for debugging)
+    # echo "Executing: $cmd"
+
+    # Execute command
+    eval "$cmd"
     local status=$?
 
     # Check rsync exit status

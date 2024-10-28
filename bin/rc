@@ -34,11 +34,12 @@ Directory Behavior (like rsync):
     rc copy src dest/      # Copies src directory to dest/src/
 
 Examples:
-    rc ls gdrive:                         # List files in Google Drive
-    rc copy -t 8 local/ gdrive:backup/    # Copy directory contents
-    rc copy -t 8 local gdrive:backup/     # Copy directory itself
-    rc sync -np docs/ gdrive:docs/        # Dry-run sync contents
-    rc move -t 16 downloads od:archive/   # Move directory to archive/downloads/
+    rc ls gdrive:                          # List files in Google Drive
+    rc copy -t 8 *.txt gdrive:backup/      # Copy all txt files
+    rc move -t 16 data-* od:archive/       # Move multiple files
+    rc copy dir/ remote:backup/            # Copy directory contents
+    rc sync -np docs/ gdrive:docs/         # Dry-run sync contents
+    rc copy -c local* remote:data/         # Copy matching directories' contents
 
 Note: 
 - Progress (-P) is enabled by default unless -q is used
@@ -56,7 +57,7 @@ EOF
     # Initialize variables
     local operation=""
     local rclone_opts="--progress --stats 1s"  # Default options
-    local source=""
+    local sources=()
     local destination=""
     local args=("$@")
     local i=0
@@ -81,13 +82,14 @@ EOF
     esac
     ((i++))
 
-    # Parse options and collect source/destination
+    # Parse options first
     while [ $i -lt ${#args[@]} ]; do
         case "${args[i]}" in
             -t)
                 ((i++))
                 if [ $i -lt ${#args[@]} ] && [[ "${args[i]}" =~ ^[0-9]+$ ]]; then
                     rclone_opts="$rclone_opts --transfers ${args[i]}"
+                    ((i++))
                 else
                     echo "Error: -t requires a number"
                     print_usage
@@ -96,21 +98,26 @@ EOF
                 ;;
             -c)
                 contents_only=true
+                ((i++))
                 ;;
             -np)
                 rclone_opts="$rclone_opts --dry-run"
+                ((i++))
                 ;;
             -v)
                 rclone_opts="$rclone_opts --verbose"
+                ((i++))
                 ;;
             -q)
                 rclone_opts=""  # Remove progress for quiet mode
                 rclone_opts="$rclone_opts --quiet"
+                ((i++))
                 ;;
             -f)
                 ((i++))
                 if [ $i -lt ${#args[@]} ]; then
                     rclone_opts="$rclone_opts --filter-from ${args[i]}"
+                    ((i++))
                 else
                     echo "Error: -f option requires a filter file path"
                     print_usage
@@ -118,22 +125,25 @@ EOF
                 fi
                 ;;
             *)
-                if [ -z "$source" ]; then
-                    source="${args[i]}"
-                elif [ -z "$destination" ] && [ "$need_dest" = true ]; then
-                    destination="${args[i]}"
-                else
-                    echo "Error: Unexpected argument '${args[i]}'"
-                    print_usage
-                    return 1
-                fi
+                break
                 ;;
         esac
+    done
+
+    # Collect sources and destination
+    local last_idx=$((${#args[@]} - 1))
+    while [ $i -lt $last_idx ]; do
+        sources+=("${args[i]}")
         ((i++))
     done
 
-    # Verify required arguments
-    if [ -z "$source" ]; then
+    # Get destination from the last argument
+    if [ $i -eq $last_idx ]; then
+        destination="${args[i]}"
+    fi
+
+    # Verify we have sources and destination
+    if [ ${#sources[@]} -eq 0 ]; then
         echo "Error: Source must be specified"
         print_usage
         return 1
@@ -146,53 +156,49 @@ EOF
     fi
 
     # Handle directory behavior for copy/move/sync operations
-    if [[ "$operation" =~ ^(copy|move|sync)$ ]] && [ "$contents_only" = false ] && [ -d "${source%/}" ]; then
-        if [[ "$source" != */ ]]; then  # No trailing slash, copy the directory itself
-            # Remove trailing slash from source if present
-            source="${source%/}"
-            # Get the base name of the source directory
-            local dirname=$(basename "$source")
-            # Remove trailing slash from destination and append the directory name
-            destination="${destination%/}/$dirname"
-        else  # Has trailing slash, copy contents only
-            source="${source%/}/"  # Ensure exactly one trailing slash
-            destination="${destination%/}"  # Remove trailing slash from destination
-        fi
-    fi
-
-    # Build and execute command
-    local cmd="rclone $operation $rclone_opts"
-    
-    # Handle path with spaces
-    if [[ "$source" == *" "* ]]; then
-        cmd="$cmd \"$source\""
+    if [[ "$operation" =~ ^(copy|move|sync)$ ]] && [ "$contents_only" = false ]; then
+        for ((j=0; j<${#sources[@]}; j++)); do
+            local src="${sources[j]}"
+            # Only process directories
+            if [ -d "${src%/}" ]; then
+                if [[ "$src" != */ ]]; then  # No trailing slash, copy the directory itself
+                    src="${src%/}"
+                    # Get the base name of the source directory
+                    local dirname=$(basename "$src")
+                    # Update the destination for this source
+                    local new_dest="${destination%/}/$dirname"
+                    # Build the command for this source
+                    local cmd="rclone $operation $rclone_opts '$src' '$new_dest'"
+                    eval "$cmd"
+                    local status=$?
+                    if [ $status -ne 0 ]; then
+                        return $status
+                    fi
+                    continue
+                fi
+            fi
+            # For files or directories with trailing slash, copy directly
+            local cmd="rclone $operation $rclone_opts '$src' '$destination'"
+            eval "$cmd"
+            local status=$?
+            if [ $status -ne 0 ]; then
+                return $status
+            fi
+        done
     else
-        cmd="$cmd $source"
-    fi
-    
-    if [ "$need_dest" = true ]; then
-        if [[ "$destination" == *" "* ]]; then
-            cmd="$cmd \"$destination\""
-        else
-            cmd="$cmd $destination"
-        fi
+        # For operations without directory handling or when -c is used
+        for src in "${sources[@]}"; do
+            local cmd="rclone $operation $rclone_opts '$src' '$destination'"
+            eval "$cmd"
+            local status=$?
+            if [ $status -ne 0 ]; then
+                return $status
+            fi
+        done
     fi
 
-    # Print the command that will be executed (uncomment for debugging)
-    # echo "Executing: $cmd"
-
-    # Execute command
-    eval "$cmd"
-    local status=$?
-
-    # Check exit status
-    if [ $status -eq 0 ]; then
-        echo "Operation completed successfully"
-        return 0
-    else
-        echo "Operation failed with exit code $status"
-        return $status
-    fi
+    echo "Operation completed successfully"
+    return 0
 }
 
 # If the script is being executed directly (not sourced),
