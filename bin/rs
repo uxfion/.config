@@ -20,14 +20,18 @@ Options:
     -h      Show this help message
     -np     Ignore permissions, owner and group
     -pw     Use password file (followed by password file path)
+    -p      Specify port number (followed by port number)
+           - For SSH connections (user@host:/path/): uses ssh -p PORT
+           - For rsync daemon (host::module/): uses --port=PORT
+           - Not applicable for SSH config aliases (host:/path/)
 
 Examples:
     rs copy /source/path/ /dest/path/
     rs move -np /source/path/ /dest/path/
     rs copy -pw ./rsync.passwd local.file server::module/path/
-    rs copy local.file remote:/path/
-    rs move *.txt remote:/backup/        # Support wildcards
-    rs copy -pw rsync.passwd file* server::module/path/
+    rs copy -p 2222 local.file user@remote:/path/     # SSH with custom port
+    rs copy -p 873 -pw pass.txt file server::module/  # Rsync daemon with port
+    rs move *.txt remote:/backup/                     # Using SSH config alias
 EOF
     }
 
@@ -44,8 +48,8 @@ EOF
     local destination=""
     local args=("$@")
     local i=0
-    local parsing_sources=false
-
+    local port=""
+    
     # Parse operation (first argument)
     if [ "${args[0]}" == "copy" ] || [ "${args[0]}" == "move" ]; then
         operation="${args[0]}"
@@ -70,6 +74,23 @@ EOF
                     ((i++))
                 else
                     echo "Error: -pw option requires a password file path"
+                    print_usage
+                    return 1
+                fi
+                ;;
+            -p)
+                ((i++))
+                if [ $i -lt ${#args[@]} ]; then
+                    if [[ "${args[i]}" =~ ^[0-9]+$ ]]; then
+                        port="${args[i]}"
+                        ((i++))
+                    else
+                        echo "Error: -p option requires a valid port number"
+                        print_usage
+                        return 1
+                    fi
+                else
+                    echo "Error: -p option requires a port number"
                     print_usage
                     return 1
                 fi
@@ -103,6 +124,23 @@ EOF
     # Add remove-source-files option for move operation
     if [ "$operation" == "move" ]; then
         rsync_opts="$rsync_opts --remove-source-files"
+    fi
+
+    # Handle port option based on destination type
+    if [ -n "$port" ]; then
+        if [[ "$destination" == *"::"* ]]; then
+            # Rsync daemon mode
+            rsync_opts="$rsync_opts --port=$port"
+        elif [[ "$destination" =~ ^[^:]+:[^:]+$ ]]; then
+            # Check if it's an IP address or hostname (not an SSH alias)
+            local host="${destination%%:*}"
+            if [[ "$host" =~ ^[^@]+@[^@]+$ ]] || [[ "$host" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+                # SSH mode with IP/domain
+                rsync_opts="$rsync_opts -e 'ssh -p $port'"
+            else
+                echo "Warning: Ignoring port option for SSH alias. Please configure port in ~/.ssh/config"
+            fi
+        fi
     fi
 
     # Build and execute command
