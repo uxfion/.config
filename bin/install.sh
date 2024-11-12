@@ -281,7 +281,7 @@ download_nvim_appimage() {
         ido cp $tdir/nvim.appimage ~/.local/bin/nvim.appimage
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release matsuu/neovim-aarch64-appimage $tdir
-        ido cp $tdir/nvim-*-aarch64.appimage ~/.local/bin/nvim.appimage
+        ido cp $tdir/nvim-*aarch64.appimage ~/.local/bin/nvim.appimage
     fi
     ido "chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim"
 }
