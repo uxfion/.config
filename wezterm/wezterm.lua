@@ -24,7 +24,7 @@ config.window_close_confirmation = 'NeverPrompt'
 
 
 config.default_prog = { 'pwsh' }
-config.default_cwd = "D:\\Lecter"
+config.default_cwd = "D:\\Lecter\\Downloads"
 -- config.default_domain = 'SSH:hx90'
 
 config.launch_menu = {
@@ -72,8 +72,8 @@ config.keys = {
     -- { key = 'F4', mods = 'NONE', action = act.ShowTabNavigator },
     { key = 'F4', mods = 'NONE', action = act.SpawnCommandInNewTab({ args = { 'ubuntu' }, }) },
 
-    { key = 'F5', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:z790.t' }, }) },
-    { key = 'F6', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:a401.t' }, }) },
+    { key = 'F5', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:3090_1.lan' }, }) },
+    { key = 'F6', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:a40_1.lan' }, }) },
     { key = 'F7', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:occc' },}) },
     { key = 'F8', mods = 'NONE', action = act.SpawnCommandInNewTab({ domain = { DomainName = 'SSH:hx90' }, }) },
 
