@@ -6,7 +6,7 @@ ido() {
 
     # 执行命令
     # "$@"
-    eval "$*"
+    eval "$*" </dev/tty
 }
 
 # If script is sourced, do nothing, only define function
