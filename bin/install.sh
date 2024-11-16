@@ -330,16 +330,14 @@ install_lazyvim() {
 
 
 # -------------------------- tools --------------------------
-download_tmux_appimage() {
+download_tmux_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release nelsonenzo/tmux-appimage $tdir appimage
-        ido cp $tdir/tmux.appimage ~/.local/bin/tmux.appimage
+        ido download_github_release pythops/tmux-linux-binary $tdir x86_64
     elif [ "$arch" = "aarch64" ]; then
-        # TODO: arm64 tmux
-        print -c purple "no arm64 tmux appimage provided, skipping..."
-        return 0
+        ido download_github_release pythops/tmux-linux-binary $tdir arm64
     fi
-    ido "chmod +x ~/.local/bin/tmux.appimage && ln -sf ~/.local/bin/tmux.appimage ~/.local/bin/tmux"
+    ido cp $tdir/tmux-linux-* ~/.local/bin/tmux
+    ido chmod +x ~/.local/bin/tmux
 }
 
 download_btop_binary() {
@@ -394,7 +392,6 @@ install_tools() {
             ido sudo apt-get update
             # TODO: arm64 ubuntu没有reptyr
             # ido sudo apt-get install -y reptyr || die "failed to install reptyr"
-            download_tmux_appimage || die "failed to download tmux"
             ;;
         apk)
             ido apk update
@@ -415,6 +412,9 @@ install_tools() {
     else
         ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
     fi
+
+    download_tmux_binary || die "failed to download tmux binary"
+    print -c green "tmux installed to ~/.local/bin/tmux"
 
     download_btop_binary || die "failed to download btop binary"
     print -c green "btop installed to ~/.local/bin/btop"
