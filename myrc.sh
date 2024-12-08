@@ -70,6 +70,22 @@ op() {
     done
 }
 
+hf_download() {
+    local input="$1"
+    IFS=',' read -ra tags <<< "$input"
+    for tag in "${tags[@]}"; do
+        ido huggingface-cli download "$tag"
+    done
+}
+
+hf_download_dataset() {
+    local input="$1"
+    IFS=',' read -ra tags <<< "$input"
+    for tag in "${tags[@]}"; do
+        ido huggingface-cli download --repo-type dataset "$tag"
+    done
+}
+
 wez() {
     export TERM_PROGRAM=WezTerm
 }
