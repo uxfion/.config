@@ -1,10 +1,10 @@
 [manager]
 prepend_keymap = [
-  { on = [ "T" ], run = "plugin --sync max-preview" },
-  { on = [ "c", "h" ], run = "plugin --sync hide-preview" },
+    { on = [ "T" ], run = "plugin max-preview" },
+    { on = [ "c", "h" ], run = "plugin hide-preview" },
 
-	{ on = [ "<C-s>" ], run = 'shell "$SHELL" --block --confirm', desc = "shell" },
-	{ on = [ "<C-g>" ], run = 'shell lazygit --block --confirm', desc = "lazygit" },
+    { on = [ "<C-s>" ], run = 'shell "$SHELL" --block', desc = "shell" },
+    { on = [ "<C-g>" ], run = 'shell lazygit --block', desc = "lazygit" },
 
     # z zoxide 快速跳转文件夹
     { on = [ "Z" ], run  = "plugin fg --args='fzf'", desc = "fzf preview" },  # 查找文件名/文件夹，有模糊匹配
@@ -21,5 +21,5 @@ prepend_keymap = [
     { on = [ "\"" ], run = "plugin shell", desc = "Default shell"},
 
     { on = [ "<C-c>" ], run = "plugin system-clipboard", desc = "Copy to system-clipboard" },
-    { on = [ "<C-v>" ], run = "shell 'cb paste' --block --confirm" , desc = "Paste from system-clipboard" },
+    { on = [ "<C-v>" ], run = "shell 'cb paste' --block" , desc = "Paste from system-clipboard" },
 ]
