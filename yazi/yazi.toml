@@ -18,11 +18,11 @@ edit = [
 
 [plugin]
 prepend_previewers = [
-    { mime = "video/*", run = "video-ffmpeg" },
+
 ]
 
 prepend_preloaders = [
-    { mime = "video/*", run = "video-ffmpeg" },
+
 ]
 
 prepend_fetchers = [
