@@ -108,7 +108,7 @@ download_ffmpeg_binary_github() {
     ido chmod +x ~/.local/bin/ffprobe
 }
 
-download_ffmpeg_binary_github() {
+download_ffmpeg_binary() {
     if [ "$arch" = "x86_64" ]; then
         ido wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -P $tdir
     elif [ "$arch" = "aarch64" ]; then
