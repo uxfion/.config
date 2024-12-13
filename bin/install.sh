@@ -2,7 +2,7 @@
 
 source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/print)
 source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/ido)
-source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/download_github_release.sh)
+source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/download_github_release)
 
 
 tdir=''
@@ -94,7 +94,7 @@ download_yazi_binary() {
     ido chmod +x ~/.local/bin/ya
 }
 
-download_ffmpeg_binary() {
+download_ffmpeg_binary_github() {
     if [ "$arch" = "x86_64" ]; then
         ido download_github_release eugeneware/ffmpeg-static $tdir ffmpeg linux x64 -e gz  # static
         ido download_github_release eugeneware/ffmpeg-static $tdir ffprobe linux x64 -e gz
@@ -104,6 +104,19 @@ download_ffmpeg_binary() {
     fi
     ido cp $tdir/ffmpeg* ~/.local/bin/ffmpeg
     ido cp $tdir/ffprobe* ~/.local/bin/ffprobe
+    ido chmod +x ~/.local/bin/ffmpeg
+    ido chmod +x ~/.local/bin/ffprobe
+}
+
+download_ffmpeg_binary_github() {
+    if [ "$arch" = "x86_64" ]; then
+        ido wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz -P $tdir
+    elif [ "$arch" = "aarch64" ]; then
+        ido wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-arm64-static.tar.xz -P $tdir
+    fi
+    ido tar -xJf $tdir/ffmpeg*.tar.xz -C $tdir
+    ido cp $tdir/ffmpeg*/ffmpeg ~/.local/bin/ffmpeg
+    ido cp $tdir/ffmpeg*/ffprobe ~/.local/bin/ffprobe
     ido chmod +x ~/.local/bin/ffmpeg
     ido chmod +x ~/.local/bin/ffprobe
 }
