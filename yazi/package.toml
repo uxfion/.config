@@ -1,19 +1,19 @@
 [plugin]
 deps = [
-    { use = "yazi-rs/plugins:chmod", rev = "62f0789" },
-    { use = "yazi-rs/plugins:max-preview", rev = "62f0789" },
-    { use = "yazi-rs/plugins:smart-filter", rev = "62f0789" },
-    { use = "yazi-rs/plugins:git", rev = "62f0789" }, 
+    { use = "yazi-rs/plugins:chmod", rev = "600614a" },
+    { use = "yazi-rs/plugins:max-preview", rev = "600614a" },
+    { use = "yazi-rs/plugins:smart-filter", rev = "600614a" },
+    { use = "yazi-rs/plugins:git", rev = "600614a" }, 
     { use = "KKV9/compress", rev = "60b24af" },
     { use = "KKV9/shell", rev = "d456cc1" },
-    { use = "KKV9/command", rev = "dc9b483" },
+    { use = "KKV9/command", rev = "95a29be" },
     { use = "orhnk/system-clipboard", rev = "7775a80" },
-    { use = "imsi32/yatline", rev = "1b4a9a1" }, 
+    { use = "imsi32/yatline", rev = "9328205" }, 
     { use = "imsi32/yatline-catppuccin", rev = "dc575da" }, 
-    { use = "yazi-rs/plugins:hide-preview", rev = "62f0789" },
+    { use = "yazi-rs/plugins:hide-preview", rev = "600614a" },
 ]
 
 [flavor]
 deps = [
-    { use = "yazi-rs/flavors:catppuccin-mocha", rev = "8458d25" }, 
+    { use = "yazi-rs/flavors:catppuccin-mocha", rev = "78d1d19" }, 
 ]
