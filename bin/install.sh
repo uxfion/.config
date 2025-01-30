@@ -291,12 +291,14 @@ install_yazi() {
 download_nvim_appimage() {
     if [ "$arch" = "x86_64" ]; then
         ido download_github_release neovim/neovim $tdir linux x86_64 appimage -e sha256 -e zsync
+        ido cp $tdir/nvim-*.appimage ~/.local/bin/nvim.appimage
     elif [ "$arch" = "aarch64" ]; then
-        # ido download_github_release matsuu/neovim-aarch64-appimage $tdir
-        # ido cp $tdir/nvim-*aarch64.appimage ~/.local/bin/nvim.appimage
-        ido download_github_release neovim/neovim $tdir linux arm64 appimage -e sha256 -e zsync
+        ido download_github_release matsuu/neovim-aarch64-appimage $tdir
+        ido cp $tdir/nvim-*aarch64.appimage ~/.local/bin/nvim.appimage
+        # TODO: GLIBC_2.38 not found
+        # ido download_github_release neovim/neovim $tdir linux arm64 appimage -e sha256 -e zsync
     fi
-    ido cp $tdir/nvim-*.appimage ~/.local/bin/nvim.appimage
+    
     ido "chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim"
 }
 
