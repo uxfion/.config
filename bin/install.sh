@@ -94,19 +94,19 @@ download_yazi_binary() {
     ido chmod +x ~/.local/bin/ya
 }
 
-download_ffmpeg_binary_github() {
-    if [ "$arch" = "x86_64" ]; then
-        ido download_github_release eugeneware/ffmpeg-static $tdir ffmpeg linux x64 -e gz  # static
-        ido download_github_release eugeneware/ffmpeg-static $tdir ffprobe linux x64 -e gz
-    elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release eugeneware/ffmpeg-static $tdir ffmpeg linux arm64 -e gz
-        ido download_github_release eugeneware/ffmpeg-static $tdir ffprobe linux arm64 -e gz
-    fi
-    ido cp $tdir/ffmpeg* ~/.local/bin/ffmpeg
-    ido cp $tdir/ffprobe* ~/.local/bin/ffprobe
-    ido chmod +x ~/.local/bin/ffmpeg
-    ido chmod +x ~/.local/bin/ffprobe
-}
+# download_ffmpeg_binary_github() {
+#     if [ "$arch" = "x86_64" ]; then
+#         ido download_github_release eugeneware/ffmpeg-static $tdir ffmpeg linux x64 -e gz  # static
+#         ido download_github_release eugeneware/ffmpeg-static $tdir ffprobe linux x64 -e gz
+#     elif [ "$arch" = "aarch64" ]; then
+#         ido download_github_release eugeneware/ffmpeg-static $tdir ffmpeg linux arm64 -e gz
+#         ido download_github_release eugeneware/ffmpeg-static $tdir ffprobe linux arm64 -e gz
+#     fi
+#     ido cp $tdir/ffmpeg* ~/.local/bin/ffmpeg
+#     ido cp $tdir/ffprobe* ~/.local/bin/ffprobe
+#     ido chmod +x ~/.local/bin/ffmpeg
+#     ido chmod +x ~/.local/bin/ffprobe
+# }
 
 download_ffmpeg_binary() {
     if [ "$arch" = "x86_64" ]; then
@@ -290,12 +290,13 @@ install_yazi() {
 # -------------------------- lazyvim --------------------------
 download_nvim_appimage() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release neovim/neovim $tdir appimage -e sha256 -e zsync
-        ido cp $tdir/nvim.appimage ~/.local/bin/nvim.appimage
+        ido download_github_release neovim/neovim $tdir linux x86_64 appimage -e sha256 -e zsync
     elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release matsuu/neovim-aarch64-appimage $tdir
-        ido cp $tdir/nvim-*aarch64.appimage ~/.local/bin/nvim.appimage
+        # ido download_github_release matsuu/neovim-aarch64-appimage $tdir
+        # ido cp $tdir/nvim-*aarch64.appimage ~/.local/bin/nvim.appimage
+        ido download_github_release neovim/neovim $tdir linux arm64 appimage -e sha256 -e zsync
     fi
+    ido cp $tdir/nvim-*.appimage ~/.local/bin/nvim.appimage
     ido "chmod +x ~/.local/bin/nvim.appimage && ln -sf ~/.local/bin/nvim.appimage ~/.local/bin/nvim"
 }
 
