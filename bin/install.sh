@@ -95,7 +95,8 @@ detect_arch_os() {
 }
 
 detect_package_manager() {
-    # 最小安装模式下不需要包管理器，require file git jq unzip tar xz bash curl wget
+    # 需要0.3-0.4G空间。最小安装模式下不需要包管理器。
+    # require file git jq unzip tar bash curl wget xz-utils(xz) bzip2
     if [ "$MINIMAL_INSTALL" = true ]; then
         PACKAGE_MANAGER="none"
         return 0
