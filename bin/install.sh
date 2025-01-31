@@ -542,6 +542,7 @@ config() {
     if [ "$MINIMAL_INSTALL" = true ]; then
         print -c purple "minimal install, remove lazyvim config"
         ido mv $CONFIG_DIR/nvim $CONFIG_DIR/nvim.bak
+    fi
 }
 
 rc() {
