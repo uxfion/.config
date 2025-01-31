@@ -4,6 +4,36 @@ source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/print
 source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/ido)
 source <(curl -s https://raw.githubusercontent.com/uxfion/.config/main/bin/download_github_release)
 
+# Add usage function
+usage() {
+    cat << EOF
+Usage: $0 [-m|--min] [-h|--help]
+
+Options:
+    -m, --min     Minimal installation (only binary downloads, no package manager operations)
+    -h, --help    Show this help message
+EOF
+    exit 1
+}
+
+# Parse command line arguments
+MINIMAL_INSTALL=false
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -m|--min)
+            MINIMAL_INSTALL=true
+            shift
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            echo "Unknown option: $1"
+            usage
+            ;;
+    esac
+done
 
 tdir=''
 cleanup() {
@@ -65,6 +95,12 @@ detect_arch_os() {
 }
 
 detect_package_manager() {
+    # 最小安装模式下不需要包管理器
+    if [ "$MINIMAL_INSTALL" = true ]; then
+        PACKAGE_MANAGER="none"
+        return 0
+    fi
+
     if command -v brew > /dev/null 2>&1; then
         PACKAGE_MANAGER="brew"
     elif command -v apt > /dev/null 2>&1; then
@@ -74,7 +110,7 @@ detect_package_manager() {
     elif command -v opkg > /dev/null 2>&1; then
         PACKAGE_MANAGER="opkg"
     else
-        die "No supported package manager found"
+        die "No supported package manager found. Use -m or --min for minimal installation mode."
     fi
     # print -c green "Package Manager: $PACKAGE_MANAGER"
 }
@@ -219,30 +255,32 @@ download_zoxide_script() {
 
 install_yazi() {
     print -c green "==== installing yazi..."
-    case "$PACKAGE_MANAGER" in
-        brew)
-            # ffmpegthumbnailer unar
-            ido brew update
-            ido brew install yazi ffmpeg sevenzip jq poppler fd ripgrep fzf zoxide imagemagick bat clipboard lazygit || die "failed to install yazi and deps"
-            print -c green "==== yazi installed!"
-            return 0
-            ;;
-        apt)
-            ido sudo apt-get update
-            ido sudo apt-get install -y file || die "failed to install file"
-            ;;
-        apk)
-            ido apk update
-            ido apk add file || die "failed to install file"
-            ;;
-        opkg)
-            ido opkg update
-            ido opkg install file || die "failed to install file"
-            ;;
-        *)
-            die "Unsupported package manager: $PACKAGE_MANAGER"
-            ;;
-    esac
+    if [ "$MINIMAL_INSTALL" = false ]; then
+        case "$PACKAGE_MANAGER" in
+            brew)
+                # ffmpegthumbnailer unar
+                ido brew update
+                ido brew install yazi ffmpeg sevenzip jq poppler fd ripgrep fzf zoxide imagemagick bat clipboard lazygit || die "failed to install yazi and deps"
+                print -c green "==== yazi installed!"
+                return 0
+                ;;
+            apt)
+                ido sudo apt-get update
+                ido sudo apt-get install -y file || die "failed to install file"
+                ;;
+            apk)
+                ido apk update
+                ido apk add file || die "failed to install file"
+                ;;
+            opkg)
+                ido opkg update
+                ido opkg install file || die "failed to install file"
+                ;;
+            *)
+                die "Unsupported package manager: $PACKAGE_MANAGER"
+                ;;
+        esac
+    fi
 
     # apt要卸载： apt autoremove ffmpeg ffmpegthumbnailer unar fd-find ripgrep fzf bat
     # binary要安装： ffmpeg 7zip jq fd ripgrep fzf
@@ -303,6 +341,14 @@ download_nvim_appimage() {
 }
 
 install_lazyvim() {
+    if [ "$MINIMAL_INSTALL" = true ]; then
+        print -c green "==== installing neovim (minimal)..."
+        # 纯二进制安装，不依赖包管理器，只需要 appimage
+        download_nvim_appimage || die "failed to download nvim appimage"
+        print -c green "==== neovim installed!"
+        return 0
+    fi
+
     print -c green "==== installing lazyvim..."
     case "$PACKAGE_MANAGER" in
         brew)
@@ -393,34 +439,36 @@ download_lazydocker_binary() {
 
 install_tools() {
     print -c green "==== installing tools..."
-    case "$PACKAGE_MANAGER" in
-        brew)
-            ido brew update
-            # brew don't have reptyr
-            ido brew install tmux starship btop xh || die "failed to install tools"
-            ido brew install lazydocker || die "failed to install lazydocker"
-            ido kitten update-self
-            print -c green "==== tools installed!"
-            return 0
-            # brew到这里结束，不走下去
-            ;;
-        apt)
-            ido sudo apt-get update
-            # TODO: arm64 ubuntu没有reptyr
-            # ido sudo apt-get install -y reptyr || die "failed to install reptyr"
-            ;;
-        apk)
-            ido apk update
-            ido apk add tmux reptyr || die "failed to install tmux and reptyr"
-            ;;
-        opkg)
-            ido opkg update
-            ido opkg install tmux || die "failed to install tmux"
-            ;;
-        *)
-            die "Unsupported package manager: $PACKAGE_MANAGER"
-            ;;
-    esac
+    if [ "$MINIMAL_INSTALL" = false ]; then
+        case "$PACKAGE_MANAGER" in
+            brew)
+                ido brew update
+                # brew don't have reptyr
+                ido brew install tmux starship btop xh || die "failed to install tools"
+                ido brew install lazydocker || die "failed to install lazydocker"
+                ido kitten update-self
+                print -c green "==== tools installed!"
+                return 0
+                # brew到这里结束，不走下去
+                ;;
+            apt)
+                ido sudo apt-get update
+                # TODO: arm64 ubuntu没有reptyr
+                # ido sudo apt-get install -y reptyr || die "failed to install reptyr"
+                ;;
+            apk)
+                ido apk update
+                ido apk add tmux reptyr || die "failed to install tmux and reptyr"
+                ;;
+            opkg)
+                ido opkg update
+                ido opkg install tmux || die "failed to install tmux"
+                ;;
+            *)
+                die "Unsupported package manager: $PACKAGE_MANAGER"
+                ;;
+        esac
+    fi
 
     # 如果是opkg，跳过安装starship，并提示skipping
     if [ "$PACKAGE_MANAGER" = "opkg" ]; then
@@ -450,27 +498,29 @@ install_tools() {
 
 prepare() {
     print -c green "prepare requirements before installation..."
-    case "$PACKAGE_MANAGER" in
-        brew)
-            ido brew install curl wget git jq unzip || die "failed to install prepare deps"
-            ;;
-        apt)
-            ido sudo apt-get update
-            ido sudo apt-get install -y curl wget git jq unzip tar build-essential python3 python3-pip || die "failed to install prepare deps"
-            ;;
-        apk)
-            ido apk update
-            ido apk add bash curl wget git jq unzip tar xz || die "failed to install prepare deps"
-            ;;
-        opkg)
-            ido opkg update
-            # opkg不能随便升级，特别是curl wget
-            ido opkg install git jq unzip tar || die "failed to install prepare deps"
-            ;;
-        *)
-            die "Unsupported package manager: $PACKAGE_MANAGER"
-            ;;
-    esac
+    if [ "$MINIMAL_INSTALL" = false ]; then
+        case "$PACKAGE_MANAGER" in
+            brew)
+                ido brew install curl wget git jq unzip || die "failed to install prepare deps"
+                ;;
+            apt)
+                ido sudo apt-get update
+                ido sudo apt-get install -y curl wget git jq unzip tar build-essential python3 python3-pip || die "failed to install prepare deps"
+                ;;
+            apk)
+                ido apk update
+                ido apk add bash curl wget git jq unzip tar xz || die "failed to install prepare deps"
+                ;;
+            opkg)
+                ido opkg update
+                # opkg不能随便升级，特别是curl wget
+                ido opkg install git jq unzip tar || die "failed to install prepare deps"
+                ;;
+            *)
+                die "Unsupported package manager: $PACKAGE_MANAGER"
+                ;;
+        esac
+    fi
     ido mkdir -p ~/.local/bin
     ido mkdir -p ~/.config
     print -c green "prepare requirements installed!"
@@ -565,6 +615,7 @@ main() {
     detect_network_tool
     detect_package_manager
     print -c green "package manager: $PACKAGE_MANAGER"
+    print -c green "minimal install: $MINIMAL_INSTALL"
 
     tdir=$(command mktemp -d "/tmp/config-install-XXXXXXXXXXXX")
     print -c green "temp dir: $tdir"
