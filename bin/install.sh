@@ -95,7 +95,7 @@ detect_arch_os() {
 }
 
 detect_package_manager() {
-    # 最小安装模式下不需要包管理器
+    # 最小安装模式下不需要包管理器，require file git jq unzip tar xz bash curl wget
     if [ "$MINIMAL_INSTALL" = true ]; then
         PACKAGE_MANAGER="none"
         return 0
@@ -107,8 +107,6 @@ detect_package_manager() {
         PACKAGE_MANAGER="apt"
     elif command -v apk > /dev/null 2>&1; then
         PACKAGE_MANAGER="apk"
-    elif command -v opkg > /dev/null 2>&1; then
-        PACKAGE_MANAGER="opkg"
     else
         die "No supported package manager found. Use -m or --min for minimal installation mode."
     fi
@@ -226,9 +224,9 @@ download_fzf_binary() {
 
 download_bat_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release sharkdp/bat $tdir linux x86_64 musl  # static
+        ido download_github_release sharkdp/bat $tdir linux x86_64 musl
     elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release sharkdp/bat $tdir linux aarch64  # 只有gnu的，没有musl
+        ido download_github_release sharkdp/bat $tdir linux aarch64 musl
     fi
     ido tar -xzf $tdir/bat-*.tar.gz -C $tdir
     ido cp $tdir/bat-*/bat ~/.local/bin/bat
@@ -271,10 +269,6 @@ install_yazi() {
             apk)
                 ido apk update
                 ido apk add file || die "failed to install file"
-                ;;
-            opkg)
-                ido opkg update
-                ido opkg install file || die "failed to install file"
                 ;;
             *)
                 die "Unsupported package manager: $PACKAGE_MANAGER"
@@ -377,10 +371,6 @@ install_lazyvim() {
             # ido npm install -g neovim
             # ido pip install pynvim
             ;;
-        opkg)
-            ido opkg update
-            # ido opkg install vim || die "failed to install file"
-            ;;
         *)
             die "Unsupported package manager: $PACKAGE_MANAGER"
             ;;
@@ -460,22 +450,13 @@ install_tools() {
                 ido apk update
                 ido apk add tmux reptyr || die "failed to install tmux and reptyr"
                 ;;
-            opkg)
-                ido opkg update
-                ido opkg install tmux || die "failed to install tmux"
-                ;;
             *)
                 die "Unsupported package manager: $PACKAGE_MANAGER"
                 ;;
         esac
     fi
 
-    # 如果是opkg，跳过安装starship，并提示skipping
-    if [ "$PACKAGE_MANAGER" = "opkg" ]; then
-        print -c purple "skipping starship installation on openwrt"
-    else
-        ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
-    fi
+    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
 
     download_tmux_binary || die "failed to download tmux binary"
     print -c green "tmux installed to ~/.local/bin/tmux"
@@ -510,11 +491,6 @@ prepare() {
             apk)
                 ido apk update
                 ido apk add bash curl wget git jq unzip tar xz || die "failed to install prepare deps"
-                ;;
-            opkg)
-                ido opkg update
-                # opkg不能随便升级，特别是curl wget
-                ido opkg install git jq unzip tar || die "failed to install prepare deps"
                 ;;
             *)
                 die "Unsupported package manager: $PACKAGE_MANAGER"
