@@ -514,7 +514,7 @@ config() {
         ido mkdir -p $CONFIG_DIR
     fi
 
-    # cd不能使用id，否则无法改变目录
+    # cd不能使用ido，否则无法改变目录
     cd $CONFIG_DIR
 
     # 检查当前目录是否是一个 git 仓库
@@ -538,6 +538,10 @@ config() {
             die "remote repo does not match, exiting"
         fi
     fi
+    
+    if [ "$MINIMAL_INSTALL" = true ]; then
+        print -c purple "minimal install, remove lazyvim config"
+        ido mv $CONFIG_DIR/nvim $CONFIG_DIR/nvim.bak
 }
 
 rc() {
