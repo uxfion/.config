@@ -22,4 +22,7 @@ prepend_keymap = [
 
     { on = [ "<C-c>" ], run = "plugin system-clipboard", desc = "Copy to system-clipboard" },
     { on = [ "<C-v>" ], run = "shell 'cb paste' --block" , desc = "Paste from system-clipboard" },
+
+    { on = [ "g", "d" ],       run = "cd ~/dl",   desc = "Goto ~/dl" },
+    { on = [ "g", "m" ],       run = "cd /mnt",   desc = "Goto /mnt" },
 ]
