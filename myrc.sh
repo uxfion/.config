@@ -136,3 +136,5 @@ fi
 
 # bind -x '"\C-p": "~/.config/bin/process"'
 # TODO: 无法交互
+
+bind -f ~/.config/.inputrc

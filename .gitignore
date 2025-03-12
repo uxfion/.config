@@ -5,6 +5,7 @@
 !README.md
 !.gitignore
 !myrc.sh
+!.inputrc
 !/bin/
 !/kitty/
 !/nvim/

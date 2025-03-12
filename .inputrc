@@ -1,0 +1,19 @@
+# case insensitive tab completion
+set completion-ignore-case On
+
+# show all available completions
+set show-all-if-ambiguous on
+
+set menu-complete-display-prefix on
+TAB:menu-complete
+
+# C-a will move to the start of the line
+# C-e will move to the end of the line
+# C-w will delete the word before the cursor
+# C-<- will move to the previous word
+# C--> will move to the next word
+
+C-e: "vim \C-t"
+C-g: unix-filename-rubout
+C-p: history-search-backward
+C-n: history-search-forward
