@@ -55,19 +55,71 @@ EOF
         if is_remote_path "$path"; then
             # Extract the part after the colon
             local remote_part="${path#*:}"
-            # Split on last /
-            echo "${remote_part##*/}"
+            # If remote_part is empty or just /, return the remote name
+            if [[ -z "$remote_part" || "$remote_part" == "/" ]]; then
+                echo "${path%:*}"
+            else
+                # Split on last /
+                echo "${remote_part##*/}"
+            fi
         else
             # Local path
             basename "${path%/}"
         fi
     }
 
-    # Function to check if a remote path is a directory (has trailing slash or empty)
-    is_remote_dir() {
+    # Function to check if a remote path is a directory using lsjson
+    check_remote_path_type() {
         local path="$1"
-        # If path has trailing slash or is just a remote root (e.g., "gdrive:"), it's a directory
-        [[ "$path" == */ ]] || [[ "$path" =~ ^[^:]+:$ ]]
+        local parent_dir
+        local basename
+        
+        # If path already has trailing slash, it's definitely a directory
+        if [[ "$path" == */ ]]; then
+            echo "dir"
+            return 0
+        fi
+        
+        # Remote root is always a directory
+        if [[ "$path" =~ ^[^:]+:$ ]]; then
+            echo "dir"
+            return 0
+        fi
+        
+        # For paths without trailing slash, we need to check with lsjson
+        # Extract parent directory and basename
+        if [[ "$path" == */* ]]; then
+            # Has path components
+            parent_dir="${path%/*}"
+            basename="${path##*/}"
+        else
+            # Just remote:name
+            parent_dir="${path%%:*}:"
+            basename="${path#*:}"
+        fi
+        
+        # Use lsjson to check if the path exists and if it's a directory
+        local json_output
+        json_output=$(rclone lsjson "$parent_dir" 2>/dev/null) || {
+            echo "error"
+            return 1
+        }
+        
+        # Parse the JSON output to find our path
+        # Using grep and cut for basic JSON parsing to avoid dependencies
+        local is_dir
+        is_dir=$(echo "$json_output" | grep -F "\"Name\":\"$basename\"" | grep -o '"IsDir":[^,}]*' | cut -d':' -f2)
+        
+        if [[ "$is_dir" == "true" ]]; then
+            echo "dir"
+        elif [[ "$is_dir" == "false" ]]; then
+            echo "file"
+        else
+            # Path not found
+            echo "notfound"
+        fi
+        
+        return 0
     }
 
     # Function to format command for display, adding quotes around arguments with spaces/special chars
@@ -266,6 +318,7 @@ EOF
         # Check if path has a trailing slash
         if [[ "$src" == */ ]]; then
             has_trailing_slash=true
+            is_dir=true
         fi
         
         # Note: If source is a wildcard pattern, is_dir and has_trailing_slash
@@ -283,14 +336,30 @@ EOF
                 echo "Warning: Source path doesn't exist: $src"
                 continue
             fi
-        elif is_remote_path "$src"; then
-            # For remote paths, we infer from the trailing slash (rsync-like behavior)
-            # Only assume it's a directory if it has a trailing slash or is a remote root
-            if is_remote_dir "$src"; then
-                is_dir=true
-            fi
+        elif is_remote_path "$src" && [[ ! "$src" == *[*?]* ]]; then
+            # For remote paths, use lsjson to check if it's a directory
+            local path_type
+            path_type=$(check_remote_path_type "$src")
+            
+            case "$path_type" in
+                "dir")
+                    is_dir=true
+                    ;;
+                "file")
+                    is_dir=false
+                    ;;
+                "notfound")
+                    echo "Warning: Remote path not found: $src"
+                    continue
+                    ;;
+                "error")
+                    echo "Warning: Error checking remote path: $src"
+                    # Default to directory behavior for safety
+                    is_dir=true
+                    ;;
+            esac
         else
-            # This is a local path with wildcards
+            # This is a path with wildcards
             # We'll let rclone handle this directly
             safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
             local status=$?
