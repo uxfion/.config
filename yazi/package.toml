@@ -1,59 +1,19 @@
 [[plugin.deps]]
 use = "yazi-rs/plugins:chmod"
-rev = "5186af7"
-hash = "f28138c2e11e87962b66d583fef724c3"
+rev = "4b027c7"
+hash = "2f1053f89d1a301a648ab181d0948e38"
 
 [[plugin.deps]]
-use = "yazi-rs/plugins:max-preview"
-rev = "5186af7"
-hash = "a8025f2bb311e869069364fba01abffc"
-
-[[plugin.deps]]
-use = "yazi-rs/plugins:hide-preview"
-rev = "5186af7"
-hash = "1e31898370b752e4faf335b762b3eeaf"
-
-[[plugin.deps]]
-use = "yazi-rs/plugins:smart-filter"
-rev = "5186af7"
-hash = "b482f4f2d3c4e0aa3f8db89a95699439"
+use = "yazi-rs/plugins:toggle-pane"
+rev = "4b027c7"
+hash = "f3853bbdd1da2fad09d059ab5464abfd"
 
 [[plugin.deps]]
 use = "yazi-rs/plugins:git"
-rev = "5186af7"
-hash = "771f18427fb75fb19990ce602bb322f4"
-
-[[plugin.deps]]
-use = "KKV9/compress"
-rev = "60b24af"
-hash = "ee025be766240cc98e671754ac836da3"
-
-[[plugin.deps]]
-use = "KKV9/shell"
-rev = "d456cc1"
-hash = "6a48fbc766371bd28a79ae0f014dfc84"
-
-[[plugin.deps]]
-use = "KKV9/command"
-rev = "95a29be"
-hash = "65fff40a0060fe4b1c42d49d29f770fd"
-
-[[plugin.deps]]
-use = "orhnk/system-clipboard"
-rev = "7775a80"
-hash = "9b8f2573da54334b04747e51556040cc"
-
-[[plugin.deps]]
-use = "imsi32/yatline"
-rev = "9328205"
-hash = "3e51d1fd8a2e481fcfa8eab1251d1c5f"
-
-[[plugin.deps]]
-use = "imsi32/yatline-catppuccin"
-rev = "dc575da"
-hash = "fd03fb015a28040bca0c0f9a8fe6fd8d"
+rev = "4b027c7"
+hash = "e0ada736ea676c2bbb3ec705a49526ef"
 
 [[flavor.deps]]
 use = "yazi-rs/flavors:catppuccin-mocha"
-rev = "c023460"
+rev = "68326b4"
 hash = "2ac87e1b3a61f5887472899e86535d29"

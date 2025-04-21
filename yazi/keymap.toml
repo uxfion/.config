@@ -1,28 +1,50 @@
-[manager]
-prepend_keymap = [
-    { on = [ "T" ], run = "plugin max-preview" },
-    { on = [ "c", "h" ], run = "plugin hide-preview" },
+# new
 
-    { on = [ "<C-s>" ], run = 'shell "$SHELL" --block', desc = "shell" },
-    { on = [ "<C-g>" ], run = 'shell lazygit --block', desc = "lazygit" },
+[[manager.prepend_keymap]]
+on   = [ "c", "m" ]
+run  = "plugin chmod"
+desc = "Chmod on selected files"
 
-    # z zoxide 快速跳转文件夹
-    { on = [ "Z" ], run  = "plugin fg --args='fzf'", desc = "fzf preview" },  # 查找文件名/文件夹，有模糊匹配
-    { on = [ "s" ], run  = "plugin fg --args='rg'", desc = "search context rg" },  # 查找文件内容 没有模糊匹配
-    { on = [ "S" ], run  = "plugin fg", desc = "search context fzf" },  # 查找文件内容，有模糊匹配
-    { on = [ "F" ], run  = "plugin smart-filter", desc = "Smart filter" },
+[[manager.prepend_keymap]]
+on   = "T"
+run  = "plugin toggle-pane max-preview"
+desc = "Maximize or restore the preview pane"
 
-    { on = [ "c", "m" ], run  = "plugin chmod", desc = "Chmod on selected files" },
-    { on = [ "c", "a" ], run  = "plugin compress", desc = "Archive selected files" },
-    { on = [ "c", "p" ], run  = "plugin command", desc = "Command panel" },
-    { on = [ "c", "t" ], run = "plugin test" },
+[[manager.prepend_keymap]]
+on   = [ "c", "h" ]
+run  = "plugin toggle-pane min-preview"
+desc = "Show or hide the preview pane"
 
-    { on = [ "'" ], run = "plugin shell --args=--block", desc = "Default shell with blocking"},
-    { on = [ "\"" ], run = "plugin shell", desc = "Default shell"},
+[[manager.prepend_keymap]]
+on   = [ "<C-g>" ]
+run  = "shell lazygit --block"
+desc = "lazygit"
 
-    { on = [ "<C-c>" ], run = "plugin system-clipboard", desc = "Copy to system-clipboard" },
-    { on = [ "<C-v>" ], run = "shell 'cb paste' --block" , desc = "Paste from system-clipboard" },
 
-    { on = [ "g", "d" ],       run = "cd ~/dl",   desc = "Goto ~/dl" },
-    { on = [ "g", "m" ],       run = "cd /mnt",   desc = "Goto /mnt" },
-]
+
+# Goto
+
+[[manager.prepend_keymap]]
+on   = [ "g", "d" ]
+run  = "cd ~/dl"
+desc = "Goto ~/dl"
+
+[[manager.prepend_keymap]]
+on   = [ "g", "D" ]
+run  = "cd ~/Downloads"
+desc = "Goto ~/Downloads"
+
+[[manager.prepend_keymap]]
+on   = [ "g", "m" ]
+run  = "cd /mnt"
+desc = "Goto /mnt"
+
+[[manager.prepend_keymap]]
+on   = [ "g", "e" ]
+run  = "cd /etc"
+desc = "Goto /etc"
+
+[[manager.prepend_keymap]]
+on   = [ "g", "t" ]
+run  = "cd ~/.local/share/Trash/files"
+desc = "Goto trash"
