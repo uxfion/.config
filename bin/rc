@@ -9,12 +9,13 @@ rc() {
         cat << EOF
 RC - A convenient wrapper for rclone
 
-Usage: rc [operation] [options] source destination
+Usage: rc [operation] [options] source [destination]
 
 Operations:
     copy    Copy files (rclone copy)
     move    Move files (rclone move)
     sync    Sync directories (rclone sync)
+    ls      List contents of a remote (rclone lsf)
 
 Options:
     -h      Show this help message
@@ -30,6 +31,7 @@ Examples:
     rc copy dir/ remote:backup/            # Copy directory contents
     rc sync docs/ gdrive:docs/             # Sync contents
     rc copy remote1:docs/ remote2:backup/  # Copy between remotes
+    rc ls gdrive:backup                    # List files in remote directory
 
 Note: 
 - Progress is enabled by default
@@ -67,16 +69,71 @@ EOF
         [[ "$path" == */ ]] || [[ "$path" =~ ^[^:]+:$ ]]
     }
 
+    # Function to format command for display, adding quotes around arguments with spaces/special chars
+    format_cmd_for_display() {
+        local cmd_str="$1"
+        shift
+        
+        for arg in "$@"; do
+            # If argument contains spaces, pipes, or other special chars, add quotes
+            if [[ "$arg" =~ [[:space:]\'\"\\|\;\&\<\>\(\)\$\`] ]]; then
+                cmd_str="$cmd_str \"$arg\""
+            else
+                cmd_str="$cmd_str $arg"
+            fi
+        done
+        
+        echo "$cmd_str"
+    }
+
     # Function to safely execute command with proper quoting
     safe_execute() {
         local operation="$1"
-        local rclone_opts="$2"
-        local src="$3"
-        local dest="$4"
+        shift
+        local src="$1"
+        shift
+        local dest="$1"
+        shift
         
-        # Use arrays to properly handle arguments with spaces and special chars
-        local cmd=(rclone "$operation" $rclone_opts "$src" "$dest")
-        echo "Executing: ${cmd[@]}"
+        # Build command array
+        local cmd=(rclone "$operation")
+        # Add all remaining arguments (options) before the source and destination
+        for opt in "$@"; do
+            cmd+=("$opt")
+        done
+        # Add source and destination
+        cmd+=("$src" "$dest")
+        
+        # Format command for display with proper quoting
+        local display_cmd=$(format_cmd_for_display "rclone $operation" "$@" "$src" "$dest")
+        echo "Executing: $display_cmd"
+        
+        # Execute the actual command
+        "${cmd[@]}"
+        return $?
+    }
+
+    # Function to safely execute a command with a single source argument
+    safe_execute_single() {
+        local operation="$1"
+        shift
+        local src="$1"
+        shift
+        
+        # Build command array
+        local cmd=(rclone "$operation")
+        # Add all remaining arguments (options) before the source
+        for opt in "$@"; do
+            cmd+=("$opt")
+        done
+        # Add source
+        cmd+=("$src")
+        
+        # Format command for display with proper quoting
+        local display_cmd=$(format_cmd_for_display "rclone $operation" "$@" "$src")
+        echo "Executing: $display_cmd"
+        
+        # Execute the actual command
         "${cmd[@]}"
         return $?
     }
@@ -94,11 +151,17 @@ EOF
     local destination=""
     local args=("$@")
     local i=0
+    local need_dest=true
 
     # Parse operation (first argument)
     case "${args[0]}" in
         copy|move|sync)
             operation="${args[0]}"
+            ;;
+        ls)
+            operation="lsf"
+            rclone_opts=(--separator "  |  " --format "tsp")
+            need_dest=false
             ;;
         *)
             echo "Error: Invalid operation '${args[0]}'"
@@ -130,27 +193,55 @@ EOF
 
     # Collect sources and destination
     local last_idx=$((${#args[@]} - 1))
-    while [ $i -lt $last_idx ]; do
-        sources+=("${args[i]}")
-        ((i++))
-    done
+    if [ "$need_dest" = true ]; then
+        while [ $i -lt $last_idx ]; do
+            sources+=("${args[i]}")
+            ((i++))
+        done
 
-    # Get destination from the last argument
-    if [ $i -eq $last_idx ]; then
-        destination="${args[i]}"
+        # Get destination from the last argument
+        if [ $i -eq $last_idx ]; then
+            destination="${args[i]}"
+        fi
+    else
+        # For operations that don't need destination (like ls), just get the source
+        if [ $i -le $last_idx ]; then
+            sources=("${args[i]}")
+        fi
     fi
 
-    # Verify we have sources and destination
+    # Verify we have sources
     if [ ${#sources[@]} -eq 0 ]; then
         echo "Error: Source must be specified"
         print_usage
         return 1
     fi
     
-    if [ -z "$destination" ]; then
+    # Verify we have destination if needed
+    if [ "$need_dest" = true ] && [ -z "$destination" ]; then
         echo "Error: Destination must be specified for $operation operation"
         print_usage
         return 1
+    fi
+
+    # Special handling for 'ls' operation
+    if [ "$operation" = "lsf" ]; then
+        local src="${sources[0]}"
+        # Check if source is a remote path
+        if ! is_remote_path "$src"; then
+            echo "Error: 'ls' operation requires a remote path (e.g., remote:path)"
+            print_usage
+            return 1
+        fi
+        
+        # Execute the ls command
+        safe_execute_single "$operation" "$src" "${rclone_opts[@]}"
+        local status=$?
+        if [ $status -ne 0 ]; then
+            echo "Error: rclone command failed with status $status"
+            return $status
+        fi
+        return 0
     fi
 
     # Check if this is a remote-to-remote transfer
@@ -192,11 +283,13 @@ EOF
         elif is_remote_path "$src"; then
             # For remote paths, we infer from the trailing slash (rsync-like behavior)
             # Only assume it's a directory if it has a trailing slash or is a remote root
-            is_dir=is_remote_dir "$src"
+            if is_remote_dir "$src"; then
+                is_dir=true
+            fi
         else
             # This is a local path with wildcards
             # We'll let rclone handle this directly
-            safe_execute "$operation" "${rclone_opts[*]}" "$src" "$destination"
+            safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
             local status=$?
             if [ $status -ne 0 ]; then
                 echo "Error: rclone command failed with status $status"
@@ -214,7 +307,7 @@ EOF
             local new_dest="${destination%/}/$dirname"
             
             # Execute command safely
-            safe_execute "$operation" "${rclone_opts[*]}" "${src%/}" "$new_dest"
+            safe_execute "$operation" "${src%/}" "$new_dest" "${rclone_opts[@]}"
             local status=$?
             if [ $status -ne 0 ]; then
                 echo "Error: rclone command failed with status $status"
@@ -222,7 +315,7 @@ EOF
             fi
         else
             # For files or directories with trailing slash, copy directly to destination
-            safe_execute "$operation" "${rclone_opts[*]}" "$src" "$destination"
+            safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
             local status=$?
             if [ $status -ne 0 ]; then
                 echo "Error: rclone command failed with status $status"
