@@ -457,7 +457,7 @@ install_tools() {
         esac
     fi
 
-    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || die "failed to install starship"  # static
+    ido "curl -sS https://starship.rs/install.sh | sh -s -- -b ~/.local/bin -y" || print -c purple "failed to install starship"  # static
 
     download_tmux_binary || die "failed to download tmux binary"
     print -c green "tmux installed to ~/.local/bin/tmux"
