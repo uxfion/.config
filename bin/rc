@@ -15,37 +15,61 @@ Operations:
     copy    Copy files (rclone copy)
     move    Move files (rclone move)
     sync    Sync directories (rclone sync)
-    ls      List contents (rclone ls)
-    lsd     List directories (rclone lsd)
-    size    Show total size (rclone size)
-    check   Check files (rclone check)
 
 Options:
     -h      Show this help message
     -t N    Set number of transfers (--transfers N)
-    -np     Dry run, no changes made (--dry-run)
-    -v      Verbose output (--verbose)
-    -q      Quiet output (--quiet) and disable progress
-    -f      Filter file (followed by filter file path)
-    -c      Copy contents only (don't create parent directory)
 
 Directory Behavior (like rsync):
     rc copy src/ dest/     # Copies contents of src to dest/
     rc copy src dest/      # Copies src directory to dest/src/
 
 Examples:
-    rc ls gdrive:                          # List files in Google Drive
-    rc copy -t 8 *.txt gdrive:backup/      # Copy all txt files
-    rc move -t 16 data-* od:archive/       # Move multiple files
+    rc copy -t 8 *.txt gdrive:backup/      # Copy all txt files with 8 transfers
+    rc move data-* od:archive/             # Move multiple files
     rc copy dir/ remote:backup/            # Copy directory contents
-    rc sync -np docs/ gdrive:docs/         # Dry-run sync contents
-    rc copy -c local* remote:data/         # Copy matching directories' contents
+    rc sync docs/ gdrive:docs/             # Sync contents
 
 Note: 
-- Progress (-P) is enabled by default unless -q is used
+- Progress is enabled by default
 - Directory behavior matches rsync (trailing slash matters)
 - Remotes should be configured using 'rclone config' first
 EOF
+    }
+
+    # Function to check if a path is remote
+    is_remote_path() {
+        [[ "$1" == *:* ]]
+    }
+
+    # Function to extract directory name from a path
+    get_dirname() {
+        local path="$1"
+        
+        # Handle remote paths (contains colon)
+        if is_remote_path "$path"; then
+            # Extract the part after the colon
+            local remote_part="${path#*:}"
+            # Split on last /
+            echo "${remote_part##*/}"
+        else
+            # Local path
+            basename "${path%/}"
+        fi
+    }
+
+    # Function to safely execute command with proper quoting
+    safe_execute() {
+        local operation="$1"
+        local rclone_opts="$2"
+        local src="$3"
+        local dest="$4"
+        
+        # Use arrays to properly handle arguments with spaces and special chars
+        local cmd=(rclone "$operation" $rclone_opts "$src" "$dest")
+        echo "Executing: ${cmd[@]}"
+        "${cmd[@]}"
+        return $?
     }
 
     # Show help if no arguments or -h
@@ -56,23 +80,16 @@ EOF
 
     # Initialize variables
     local operation=""
-    local rclone_opts="--progress --stats 1s"  # Default options
+    local rclone_opts=(-P)  # Default options as array - just -P for progress
     local sources=()
     local destination=""
     local args=("$@")
     local i=0
-    local need_dest=true
-    local contents_only=false
 
     # Parse operation (first argument)
     case "${args[0]}" in
-        copy|move|sync|check)
+        copy|move|sync)
             operation="${args[0]}"
-            ;;
-        ls|lsd|size)
-            operation="${args[0]}"
-            need_dest=false
-            rclone_opts=""  # No progress needed for these operations
             ;;
         *)
             echo "Error: Invalid operation '${args[0]}'"
@@ -88,38 +105,10 @@ EOF
             -t)
                 ((i++))
                 if [ $i -lt ${#args[@]} ] && [[ "${args[i]}" =~ ^[0-9]+$ ]]; then
-                    rclone_opts="$rclone_opts --transfers ${args[i]}"
+                    rclone_opts+=(--transfers "${args[i]}")
                     ((i++))
                 else
                     echo "Error: -t requires a number"
-                    print_usage
-                    return 1
-                fi
-                ;;
-            -c)
-                contents_only=true
-                ((i++))
-                ;;
-            -np)
-                rclone_opts="$rclone_opts --dry-run"
-                ((i++))
-                ;;
-            -v)
-                rclone_opts="$rclone_opts --verbose"
-                ((i++))
-                ;;
-            -q)
-                rclone_opts=""  # Remove progress for quiet mode
-                rclone_opts="$rclone_opts --quiet"
-                ((i++))
-                ;;
-            -f)
-                ((i++))
-                if [ $i -lt ${#args[@]} ]; then
-                    rclone_opts="$rclone_opts --filter-from ${args[i]}"
-                    ((i++))
-                else
-                    echo "Error: -f option requires a filter file path"
                     print_usage
                     return 1
                 fi
@@ -149,53 +138,87 @@ EOF
         return 1
     fi
     
-    if [ "$need_dest" = true ] && [ -z "$destination" ]; then
+    if [ -z "$destination" ]; then
         echo "Error: Destination must be specified for $operation operation"
         print_usage
         return 1
     fi
 
     # Handle directory behavior for copy/move/sync operations
-    if [[ "$operation" =~ ^(copy|move|sync)$ ]] && [ "$contents_only" = false ]; then
-        for ((j=0; j<${#sources[@]}; j++)); do
-            local src="${sources[j]}"
-            # Only process directories
+    for ((j=0; j<${#sources[@]}; j++)); do
+        local src="${sources[j]}"
+        
+        # Determine if this is a directory path without trailing slash
+        local is_dir=false
+        local has_trailing_slash=false
+        
+        # Check if path has a trailing slash
+        if [[ "$src" == */ ]]; then
+            has_trailing_slash=true
+        fi
+        
+        # Note: If source is a wildcard pattern, is_dir and has_trailing_slash
+        # might not be accurate, but we'll handle it in the file existence check
+        
+        # For local paths, check if it's a directory
+        if ! is_remote_path "$src" && [[ ! "$src" == *[*?]* ]]; then  # Skip check for paths with wildcards
             if [ -d "${src%/}" ]; then
-                if [[ "$src" != */ ]]; then  # No trailing slash, copy the directory itself
-                    src="${src%/}"
-                    # Get the base name of the source directory
-                    local dirname=$(basename "$src")
-                    # Update the destination for this source
-                    local new_dest="${destination%/}/$dirname"
-                    # Build the command for this source
-                    local cmd="rclone $operation $rclone_opts '$src' '$new_dest'"
-                    eval "$cmd"
-                    local status=$?
-                    if [ $status -ne 0 ]; then
-                        return $status
-                    fi
-                    continue
-                fi
+                is_dir=true
+            elif [ -e "${src%/}" ]; then
+                # It exists but is not a directory (might be a file)
+                is_dir=false
+            else
+                # Path doesn't exist
+                echo "Warning: Source path doesn't exist: $src"
+                continue
             fi
-            # For files or directories with trailing slash, copy directly
-            local cmd="rclone $operation $rclone_opts '$src' '$destination'"
-            eval "$cmd"
+        elif is_remote_path "$src"; then
+            # For remote paths, we can't easily check if it's a directory
+            # So we infer from the trailing slash (rsync-like behavior)
+            if [ "$has_trailing_slash" = true ]; then
+                is_dir=true
+            else
+                # Without trailing slash and remote path, we'll assume it's a
+                # directory-like object and handle it like a directory
+                is_dir=true
+            fi
+        else
+            # This is a local path with wildcards
+            # We'll let rclone handle this directly
+            safe_execute "$operation" "${rclone_opts[*]}" "$src" "$destination"
             local status=$?
             if [ $status -ne 0 ]; then
+                echo "Error: rclone command failed with status $status"
                 return $status
             fi
-        done
-    else
-        # For operations without directory handling or when -c is used
-        for src in "${sources[@]}"; do
-            local cmd="rclone $operation $rclone_opts '$src' '$destination'"
-            eval "$cmd"
+            # Skip further processing for this wildcard source
+            continue
+        fi
+        
+        if [ "$is_dir" = true ] && [ "$has_trailing_slash" = false ]; then
+            # No trailing slash on directory, copy the directory itself
+            # Get directory name
+            local dirname=$(get_dirname "$src")
+            # Update the destination for this source
+            local new_dest="${destination%/}/$dirname"
+            
+            # Execute command safely
+            safe_execute "$operation" "${rclone_opts[*]}" "${src%/}" "$new_dest"
             local status=$?
             if [ $status -ne 0 ]; then
+                echo "Error: rclone command failed with status $status"
                 return $status
             fi
-        done
-    fi
+        else
+            # For files or directories with trailing slash, copy directly to destination
+            safe_execute "$operation" "${rclone_opts[*]}" "$src" "$destination"
+            local status=$?
+            if [ $status -ne 0 ]; then
+                echo "Error: rclone command failed with status $status"
+                return $status
+            fi
+        fi
+    done
 
     echo "Operation completed successfully"
     return 0
