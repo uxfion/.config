@@ -139,67 +139,56 @@ EOF
         echo "$cmd_str"
     }
 
-    # Function to check command status and handle errors
-    check_command_status() {
-        local status=$1
-        if [ $status -ne 0 ]; then
-            echo "Error: rclone command failed with status $status"
-            return 1
-        fi
-        return 0
-    }
-
-    # Unified function to safely execute rclone commands
-    safe_execute_command() {
+    # Function to safely execute command with proper quoting
+    safe_execute() {
         local operation="$1"
+        shift
+        local src="$1"
+        shift
+        local dest="$1"
         shift
         
         # Build command array
         local cmd=(rclone "$operation")
-        local display_args=("$operation")
-        
-        # Process all arguments
-        local arg_count=0
-        local src=""
-        local dest=""
-        
-        for arg in "$@"; do
-            if [[ $arg_count -eq 0 ]]; then
-                # First argument is source
-                src="$arg"
-                ((arg_count++))
-            elif [[ $arg_count -eq 1 && "$dest" == "" ]]; then
-                # Second argument is destination (if provided)
-                dest="$arg"
-                ((arg_count++))
-            else
-                # Other arguments are options
-                cmd+=("$arg")
-                display_args+=("$arg")
-            fi
+        # Add all remaining arguments (options) before the source and destination
+        for opt in "$@"; do
+            cmd+=("$opt")
         done
-        
-        # Add source and destination to the command
-        cmd+=("$src")
-        display_args+=("$src")
-        
-        if [[ -n "$dest" ]]; then
-            cmd+=("$dest")
-            display_args+=("$dest")
-        fi
+        # Add source and destination
+        cmd+=("$src" "$dest")
         
         # Format command for display with proper quoting
-        local display_cmd=$(format_cmd_for_display "rclone" "${display_args[@]}")
+        local display_cmd=$(format_cmd_for_display "rclone $operation" "$@" "$src" "$dest")
         echo "Executing: $display_cmd"
         
         # Execute the actual command
         "${cmd[@]}"
+        return $?
+    }
+
+    # Function to safely execute a command with a single source argument
+    safe_execute_single() {
+        local operation="$1"
+        shift
+        local src="$1"
+        shift
         
-        # Check and handle command status
-        local status=$?
-        check_command_status $status || return $status
+        # Build command array
+        local cmd=(rclone "$operation")
+        # Add all remaining arguments (options) before the source
+        for opt in "$@"; do
+            cmd+=("$opt")
+        done
+        # Add source
+        cmd+=("$src")
         
-        return 0
+        # Format command for display with proper quoting
+        local display_cmd=$(format_cmd_for_display "rclone $operation" "$@" "$src")
+        echo "Executing: $display_cmd"
+        
+        # Execute the actual command
+        "${cmd[@]}"
+        return $?
     }
 
     # Show help if no arguments or -h
@@ -301,7 +290,12 @@ EOF
         fi
         
         # Execute the ls command
-        safe_execute_command "$operation" "$src" "${rclone_opts[@]}" || return $?
+        safe_execute_single "$operation" "$src" "${rclone_opts[@]}"
+        local status=$?
+        if [ $status -ne 0 ]; then
+            echo "Error: rclone command failed with status $status"
+            return $status
+        fi
         return 0
     fi
 
@@ -367,7 +361,12 @@ EOF
         else
             # This is a path with wildcards
             # We'll let rclone handle this directly
-            safe_execute_command "$operation" "$src" "$destination" "${rclone_opts[@]}" || return $?
+            safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
+            local status=$?
+            if [ $status -ne 0 ]; then
+                echo "Error: rclone command failed with status $status"
+                return $status
+            fi
             # Skip further processing for this wildcard source
             continue
         fi
@@ -380,10 +379,20 @@ EOF
             local new_dest="${destination%/}/$dirname"
             
             # Execute command safely
-            safe_execute_command "$operation" "${src%/}" "$new_dest" "${rclone_opts[@]}" || return $?
+            safe_execute "$operation" "${src%/}" "$new_dest" "${rclone_opts[@]}"
+            local status=$?
+            if [ $status -ne 0 ]; then
+                echo "Error: rclone command failed with status $status"
+                return $status
+            fi
         else
             # For files or directories with trailing slash, copy directly to destination
-            safe_execute_command "$operation" "$src" "$destination" "${rclone_opts[@]}" || return $?
+            safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
+            local status=$?
+            if [ $status -ne 0 ]; then
+                echo "Error: rclone command failed with status $status"
+                return $status
+            fi
         fi
     done
 
