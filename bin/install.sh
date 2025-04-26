@@ -542,6 +542,7 @@ config() {
     
     if [ "$MINIMAL_INSTALL" = true ]; then
         print -c purple "minimal install, remove lazyvim config"
+        ido rm -rf $CONFIG_DIR/nvim.bak
         ido mv $CONFIG_DIR/nvim $CONFIG_DIR/nvim.bak
     fi
 }
@@ -597,7 +598,7 @@ main() {
     detect_network_tool
     detect_package_manager
     print -c green "package manager: $PACKAGE_MANAGER"
-    print -c green "minimal install: $MINIMAL_INSTALL"
+    print -c purple "minimal install: $MINIMAL_INSTALL"
 
     tdir=$(command mktemp -d "/tmp/config-install-XXXXXXXXXXXX")
     print -c green "temp dir: $tdir"
