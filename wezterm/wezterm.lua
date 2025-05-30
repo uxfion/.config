@@ -51,6 +51,9 @@ config.keys = {
     { key = 'F1', mods = 'NONE', action = act.ActivateCommandPalette },
     { key = 'F2', mods = 'NONE', action = act.ShowLauncher },
     { key = 'F11', mods = 'NONE', action = act.ToggleFullScreen },
+
+    { key = '-', mods = 'CTRL', action = act.DisableDefaultAssignment },
+    { key = '=', mods = 'CTRL', action = act.DisableDefaultAssignment },
 }
 
 
