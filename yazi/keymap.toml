@@ -16,6 +16,11 @@ run  = "plugin toggle-pane min-preview"
 desc = "Show or hide the preview pane"
 
 [[mgr.prepend_keymap]]
+on   = [ "c", "l" ]
+run  = "hardlink"
+desc = "Hardlink"
+
+[[mgr.prepend_keymap]]
 on   = [ "<C-g>" ]
 run  = "shell lazygit --block"
 desc = "lazygit"
