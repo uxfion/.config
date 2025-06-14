@@ -1,6 +1,16 @@
 # new
 
 [[mgr.prepend_keymap]]
+on   = [ "k" ]
+run  = "arrow -1"
+desc = "Previous file"
+
+[[mgr.prepend_keymap]]
+on   = [ "j" ]
+run  = "arrow 1"
+desc = "Next file"
+
+[[mgr.prepend_keymap]]
 on   = [ "c", "m" ]
 run  = "plugin chmod"
 desc = "Chmod on selected files"
