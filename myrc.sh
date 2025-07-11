@@ -138,3 +138,11 @@ fi
 # TODO: 无法交互
 
 bind -f ~/.config/.inputrc
+
+
+cs() {
+    source <(/root/.config/bin/conda_selector.sh)
+}
+cdd() {
+    conda deactivate
+}
