@@ -35,7 +35,7 @@ Examples:
 
 Note: 
 - Progress is enabled by default (-P/--progress)
-- Empty source directories are preserved (--create-empty-src-dirs)
+- Empty source directories are not preserved (try to use --create-empty-src-dirs)
 - Directory behavior matches rsync (trailing slash matters)
 - Remotes should be configured using 'rclone config' first
 - For remote-to-remote transfers, consider using -t with higher value
@@ -211,7 +211,7 @@ EOF
         copy|move|sync)
             operation="${args[0]}"
             # Add --create-empty-src-dirs for these operations
-            rclone_opts+=("--create-empty-src-dirs")
+            # rclone_opts+=("--create-empty-src-dirs")
             ;;
         ls)
             operation="lsf"
