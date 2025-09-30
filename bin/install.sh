@@ -361,7 +361,7 @@ install_lazyvim() {
             # TODO: 高于ubuntu24需要libfuse2t64，https://github.com/AppImage/AppImageKit/wiki/FUSE#type-2-appimage
             download_nvim_appimage || die "failed to download nvim appimage"
             print -c green "nvim installed to ~/.local/bin/nvim"
-            ido "curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -" || die "failed to setup nodejs repository"
+            ido "curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -" || die "failed to setup nodejs repository"
             ido sudo apt-get install -y nodejs || die "failed to install nodejs"
             # ido npm install -g neovim
             # ido pip install pynvim
