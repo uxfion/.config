@@ -117,9 +117,9 @@ detect_package_manager() {
 # -------------------------- yazi --------------------------
 download_yazi_binary() {
     if [ "$arch" = "x86_64" ]; then
-        ido download_github_release sxyazi/yazi $tdir linux x86_64 musl
+        ido download_github_release sxyazi/yazi $tdir linux x86_64 musl zip
     elif [ "$arch" = "aarch64" ]; then
-        ido download_github_release sxyazi/yazi $tdir linux aarch64 musl
+        ido download_github_release sxyazi/yazi $tdir linux aarch64 musl zip
     fi
     mkdir -p $tdir/yazi
     ido unzip $tdir/yazi-*.zip -d $tdir
