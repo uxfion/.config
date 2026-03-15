@@ -5,48 +5,72 @@
       {
         "id": "11",
         "type": "model",
-        "color": "cyan"
+        "color": "cyan",
+        "rawValue": true
       },
       {
         "id": "12",
         "type": "context-length",
-        "color": "brightBlack"
+        "color": "brightBlack",
+        "rawValue": false
       },
       {
         "id": "13",
-        "type": "context-bar"
+        "type": "context-bar",
+        "color": "green",
+        "rawValue": true,
+        "metadata": {
+          "display": "progress-short"
+        }
       },
       {
         "id": "14",
         "type": "git-branch",
-        "color": "magenta"
+        "color": "yellow",
+        "rawValue": false
       },
       {
         "id": "4",
         "type": "git-changes",
-        "color": "yellow"
+        "color": "red"
       }
     ],
     [
       {
         "id": "5",
-        "type": "tokens-input"
+        "type": "tokens-input",
+        "color": "brightBlack",
+        "rawValue": false
       },
       {
         "id": "6",
-        "type": "tokens-output"
+        "type": "tokens-output",
+        "color": "brightBlack"
       },
       {
         "id": "7",
-        "type": "tokens-cached"
+        "type": "tokens-cached",
+        "color": "brightBlack"
       },
       {
         "id": "8",
-        "type": "tokens-total"
+        "type": "tokens-total",
+        "color": "brightBlack"
       },
       {
         "id": "9",
-        "type": "session-cost"
+        "type": "session-cost",
+        "color": "brightRed",
+        "rawValue": true
+      },
+      {
+        "id": "fa975c54-c729-4b86-b7f3-0bd80a5a8251",
+        "type": "skills",
+        "color": "cyan",
+        "rawValue": false,
+        "metadata": {
+          "mode": "list"
+        }
       }
     ],
     [
@@ -61,6 +85,8 @@
   "flexMode": "full-until-compact",
   "compactThreshold": 60,
   "colorLevel": 2,
+  "defaultSeparator": "  ",
+  "defaultPadding": "",
   "inheritSeparatorColors": false,
   "globalBold": false,
   "powerline": {
@@ -74,7 +100,5 @@
     "startCaps": [],
     "endCaps": [],
     "autoAlign": false
-  },
-  "defaultPadding": "",
-  "defaultSeparator": "  "
+  }
 }
