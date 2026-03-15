@@ -1,0 +1,76 @@
+{
+  "version": 3,
+  "lines": [
+    [
+      {
+        "id": "1",
+        "type": "model",
+        "color": "cyan"
+      },
+      {
+        "id": "2",
+        "type": "context-length",
+        "color": "brightBlack"
+      },
+      {
+        "id": "3",
+        "type": "git-branch",
+        "color": "magenta"
+      },
+      {
+        "id": "4",
+        "type": "git-changes",
+        "color": "yellow"
+      }
+    ],
+    [
+      {
+        "id": "5",
+        "type": "tokens-input"
+      },
+      {
+        "id": "6",
+        "type": "tokens-output"
+      },
+      {
+        "id": "7",
+        "type": "tokens-cached"
+      },
+      {
+        "id": "8",
+        "type": "tokens-total"
+      },
+      {
+        "id": "9",
+        "type": "session-cost"
+      }
+    ],
+    [
+      {
+        "id": "10",
+        "type": "custom-command",
+        "commandPath": "npx -y ccusage@latest statusline",
+        "timeout": 60000
+      }
+    ]
+  ],
+  "flexMode": "full-until-compact",
+  "compactThreshold": 60,
+  "colorLevel": 2,
+  "inheritSeparatorColors": false,
+  "globalBold": false,
+  "powerline": {
+    "enabled": false,
+    "separators": [
+      ""
+    ],
+    "separatorInvertBackground": [
+      false
+    ],
+    "startCaps": [],
+    "endCaps": [],
+    "autoAlign": false
+  },
+  "defaultPadding": "",
+  "defaultSeparator": "  "
+}

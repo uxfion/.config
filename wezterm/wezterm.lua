@@ -16,7 +16,7 @@ config.font = wezterm.font("JetBrainsMonoNL Nerd Font", { weight = "Regular" })
 
 config.use_fancy_tab_bar = false
 config.window_decorations = "RESIZE"
-config.window_background_opacity = 0.95
+-- config.window_background_opacity = 0.95
 
 
 config.default_prog = { 'pwsh' }
