@@ -3,17 +3,21 @@
   "lines": [
     [
       {
-        "id": "1",
+        "id": "11",
         "type": "model",
         "color": "cyan"
       },
       {
-        "id": "2",
+        "id": "12",
         "type": "context-length",
         "color": "brightBlack"
       },
       {
-        "id": "3",
+        "id": "13",
+        "type": "context-bar"
+      },
+      {
+        "id": "14",
         "type": "git-branch",
         "color": "magenta"
       },
