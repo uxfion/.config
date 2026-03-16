@@ -12,7 +12,8 @@
         "id": "12",
         "type": "context-length",
         "color": "brightBlack",
-        "rawValue": false
+        "rawValue": false,
+        "merge": true
       },
       {
         "id": "13",
@@ -27,7 +28,8 @@
         "id": "14",
         "type": "git-branch",
         "color": "yellow",
-        "rawValue": false
+        "rawValue": false,
+        "merge": true
       },
       {
         "id": "4",
@@ -64,10 +66,8 @@
         "rawValue": true
       },
       {
-        "id": "fa975c54-c729-4b86-b7f3-0bd80a5a8251",
+        "id": "0fdc6671-5bf4-4d7f-a01a-f3e529d67f1f",
         "type": "skills",
-        "color": "cyan",
-        "rawValue": false,
         "metadata": {
           "mode": "list"
         }
