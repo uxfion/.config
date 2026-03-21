@@ -66,11 +66,12 @@
         "rawValue": true
       },
       {
-        "id": "0fdc6671-5bf4-4d7f-a01a-f3e529d67f1f",
+        "id": "a6074ef9-3ce5-4b10-b963-909990241770",
         "type": "skills",
         "metadata": {
           "mode": "list"
-        }
+        },
+        "rawValue": false
       }
     ],
     [
