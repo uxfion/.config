@@ -16,4 +16,6 @@ TAB:menu-complete
 C-e: "vim \C-t"
 C-g: unix-filename-rubout
 C-p: history-search-backward
+"\e[A": history-search-backward
 C-n: history-search-forward
+"\e[B": history-search-forward
