@@ -78,7 +78,7 @@
       {
         "id": "10",
         "type": "custom-command",
-        "commandPath": "npx -y ccusage@latest statusline",
+        "commandPath": "bunx -y ccusage@latest statusline",
         "timeout": 60000
       }
     ]
