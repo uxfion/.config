@@ -7,6 +7,10 @@
 #         Copyright 2012— Gregory Pakosz (@gpakosz).
 
 
+set -g allow-passthrough on
+set -s extended-keys on
+set -as terminal-features 'xterm*:extkeys'
+
 # -- bindings ------------------------------------------------------------------
 
 # preserve tmux stock bindings,
