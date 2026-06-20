@@ -1,407 +1,235 @@
-#!/bin/bash
+#!/usr/bin/env bash
+#
+# rc — rclone 的薄封装，把 rsync 的尾斜杠肌肉记忆还给你。
+#
+#   src/   拷内容        (与 rclone 原生一致，直透)
+#   src    拷目录本身     (自动把目录名拼到目标后，省得敲两遍)
+#
+# 设计原则：可靠、透明、绝不替你猜。执行前打印真实 rclone 命令；
+# 出错立即停；只探测「源」，目标不存在交给 rclone 自动创建。
+# 详见同目录的设计规格（rc-redesign-spec.md）。
 
-# rc - A convenient wrapper for rclone
-# Can be both executed directly and sourced
+set -euo pipefail
 
-rc() {
-    # Function to print usage
-    print_usage() {
-        cat << EOF
-RC - A convenient wrapper for rclone
+# ── 基础工具 ────────────────────────────────────────────────────────────────
 
-Usage: rc [operation] [options] source [destination]
+die() { printf 'rc: %s\n' "$*" >&2; exit 1; }
 
-Operations:
-    copy    Copy files (rclone copy)
-    move    Move files (rclone move)
-    sync    Sync directories (rclone sync)
-    ls      List contents of a remote (rclone lsf)
+# 远程路径：以 "name:" 开头，或以 ":" 开头(rclone on-the-fly，如 :local:)
+is_remote() { [[ $1 == :* || $1 =~ ^[A-Za-z0-9_.+-]+: ]]; }
 
-Options:
-    -h      Show this help message
-    -t N    Set number of transfers (--transfers N)
+# 含 shell 通配符（未被展开时交给 rclone 自己处理，不做类型探测）
+has_glob() { [[ $1 == *[*?]* ]]; }
 
-Directory Behavior (like rsync):
-    rc copy src/ dest/     # Copies contents of src to dest/
-    rc copy src dest/      # Copies src directory to dest/src/
-
-Examples:
-    rc copy -t 8 *.txt gdrive:backup/      # Copy all txt files with 8 transfers
-    rc move data-* od:archive/             # Move multiple files
-    rc copy dir/ remote:backup/            # Copy directory contents
-    rc sync docs/ gdrive:docs/             # Sync contents
-    rc copy remote1:docs/ remote2:backup/  # Copy between remotes
-    rc ls gdrive:backup                    # List files in remote directory
-
-Note: 
-- Progress is enabled by default (-P/--progress)
-- Empty source directories are not preserved (try to use --create-empty-src-dirs)
-- Directory behavior matches rsync (trailing slash matters)
-- Remotes should be configured using 'rclone config' first
-- For remote-to-remote transfers, consider using -t with higher value
-EOF
-    }
-
-    # Function to check if a path is remote
-    is_remote_path() {
-        [[ "$1" == *:* ]]
-    }
-
-    # Function to extract directory name from a path
-    get_dirname() {
-        local path="$1"
-        
-        # Handle remote paths (contains colon)
-        if is_remote_path "$path"; then
-            # Extract the part after the colon
-            local remote_part="${path#*:}"
-            # If remote_part is empty or just /, return the remote name
-            if [[ -z "$remote_part" || "$remote_part" == "/" ]]; then
-                echo "${path%:*}"
-            else
-                # Split on last /
-                echo "${remote_part##*/}"
-            fi
-        else
-            # Local path
-            basename "${path%/}"
-        fi
-    }
-
-    # Function to check if a remote path is a directory using lsjson
-    check_remote_path_type() {
-        local path="$1"
-        local parent_dir
-        local basename
-        
-        # If path already has trailing slash, it's definitely a directory
-        if [[ "$path" == */ ]]; then
-            echo "dir"
-            return 0
-        fi
-        
-        # Remote root is always a directory
-        if [[ "$path" =~ ^[^:]+:$ ]]; then
-            echo "dir"
-            return 0
-        fi
-        
-        # For paths without trailing slash, we need to check with lsjson
-        # Extract parent directory and basename
-        if [[ "$path" == */* ]]; then
-            # Has path components
-            parent_dir="${path%/*}"
-            basename="${path##*/}"
-        else
-            # Just remote:name
-            parent_dir="${path%%:*}:"
-            basename="${path#*:}"
-        fi
-        
-        # Use lsjson to check if the path exists and if it's a directory
-        local json_output
-        json_output=$(rclone lsjson "$parent_dir" 2>/dev/null) || {
-            echo "error"
-            return 1
-        }
-        
-        # Parse the JSON output to find our path
-        # Using grep and cut for basic JSON parsing to avoid dependencies
-        local is_dir
-        is_dir=$(echo "$json_output" | grep -F "\"Name\":\"$basename\"" | grep -o '"IsDir":[^,}]*' | cut -d':' -f2)
-        
-        if [[ "$is_dir" == "true" ]]; then
-            echo "dir"
-        elif [[ "$is_dir" == "false" ]]; then
-            echo "file"
-        else
-            # Path not found
-            echo "notfound"
-        fi
-        
-        return 0
-    }
-
-    # Function to format command for display, adding quotes around arguments with spaces/special chars
-    format_cmd_for_display() {
-        local cmd_str="$1"
-        shift
-        
-        for arg in "$@"; do
-            # If argument contains spaces, pipes, or other special chars, add quotes
-            if [[ "$arg" =~ [[:space:]\'\"\\|\;\&\<\>\(\)\$\`] ]]; then
-                cmd_str="$cmd_str \"$arg\""
-            else
-                cmd_str="$cmd_str $arg"
-            fi
-        done
-        
-        echo "$cmd_str"
-    }
-
-    # Function to safely execute command with proper quoting
-    safe_execute() {
-        local operation="$1"
-        shift
-        local src="$1"
-        shift
-        local dest="$1"
-        shift
-        
-        # Build command array
-        local cmd=(rclone "$operation")
-        # Add all remaining arguments (options) before the source and destination
-        for opt in "$@"; do
-            cmd+=("$opt")
-        done
-        # Add source and destination
-        cmd+=("$src" "$dest")
-        
-        # Format command for display with proper quoting
-        local display_cmd=$(format_cmd_for_display "rclone $operation" "$@" "$src" "$dest")
-        echo "Executing: $display_cmd"
-        
-        # Execute the actual command
-        "${cmd[@]}"
-        return $?
-    }
-
-    # Function to safely execute a command with a single source argument
-    safe_execute_single() {
-        local operation="$1"
-        shift
-        local src="$1"
-        shift
-        
-        # Build command array
-        local cmd=(rclone "$operation")
-        # Add all remaining arguments (options) before the source
-        for opt in "$@"; do
-            cmd+=("$opt")
-        done
-        # Add source
-        cmd+=("$src")
-        
-        # Format command for display with proper quoting
-        local display_cmd=$(format_cmd_for_display "rclone $operation" "$@" "$src")
-        echo "Executing: $display_cmd"
-        
-        # Execute the actual command
-        "${cmd[@]}"
-        return $?
-    }
-
-    # Show help if no arguments or -h
-    if [ $# -eq 0 ] || [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-        print_usage
-        return 0
-    fi
-
-    # Initialize variables
-    local operation=""
-    local rclone_opts=(-P)  # Default options as array - just -P for progress
-    local sources=()
-    local destination=""
-    local args=("$@")
-    local i=0
-    local need_dest=true
-
-    # Parse operation (first argument)
-    case "${args[0]}" in
-        copy|move|sync)
-            operation="${args[0]}"
-            # Add --create-empty-src-dirs for these operations
-            # rclone_opts+=("--create-empty-src-dirs")
-            ;;
-        ls)
-            operation="lsf"
-            rclone_opts=(--separator "  |  " --format "tsp")
-            need_dest=false
-            ;;
-        *)
-            echo "Error: Invalid operation '${args[0]}'"
-            print_usage
-            return 1
-            ;;
-    esac
-    ((i++))
-
-    # Parse options first
-    while [ $i -lt ${#args[@]} ]; do
-        case "${args[i]}" in
-            -t)
-                ((i++))
-                if [ $i -lt ${#args[@]} ] && [[ "${args[i]}" =~ ^[0-9]+$ ]]; then
-                    rclone_opts+=(--transfers "${args[i]}")
-                    ((i++))
-                else
-                    echo "Error: -t requires a number"
-                    print_usage
-                    return 1
-                fi
-                ;;
-            *)
-                break
-                ;;
-        esac
-    done
-
-    # Collect sources and destination
-    local last_idx=$((${#args[@]} - 1))
-    if [ "$need_dest" = true ]; then
-        while [ $i -lt $last_idx ]; do
-            sources+=("${args[i]}")
-            ((i++))
-        done
-
-        # Get destination from the last argument
-        if [ $i -eq $last_idx ]; then
-            destination="${args[i]}"
-        fi
-    else
-        # For operations that don't need destination (like ls), just get the source
-        if [ $i -le $last_idx ]; then
-            sources=("${args[i]}")
-        fi
-    fi
-
-    # Verify we have sources
-    if [ ${#sources[@]} -eq 0 ]; then
-        echo "Error: Source must be specified"
-        print_usage
-        return 1
-    fi
-    
-    # Verify we have destination if needed
-    if [ "$need_dest" = true ] && [ -z "$destination" ]; then
-        echo "Error: Destination must be specified for $operation operation"
-        print_usage
-        return 1
-    fi
-
-    # Special handling for 'ls' operation
-    if [ "$operation" = "lsf" ]; then
-        local src="${sources[0]}"
-        # Check if source is a remote path
-        if ! is_remote_path "$src"; then
-            echo "Error: 'ls' operation requires a remote path (e.g., remote:path)"
-            print_usage
-            return 1
-        fi
-        
-        # Execute the ls command
-        safe_execute_single "$operation" "$src" "${rclone_opts[@]}"
-        local status=$?
-        if [ $status -ne 0 ]; then
-            echo "Error: rclone command failed with status $status"
-            return $status
-        fi
-        return 0
-    fi
-
-    # Check if this is a remote-to-remote transfer
-    if is_remote_path "${sources[0]}" && is_remote_path "$destination"; then
-        # For remote-to-remote transfers, suggest higher transfer count if not set
-        if ! [[ " ${rclone_opts[*]} " =~ " --transfers " ]]; then
-            echo "Note: For remote-to-remote transfers, consider using -t option to set higher transfer count"
-        fi
-    fi
-
-    # Handle directory behavior for copy/move/sync operations
-    for ((j=0; j<${#sources[@]}; j++)); do
-        local src="${sources[j]}"
-        
-        # Determine if this is a directory path without trailing slash
-        local is_dir=false
-        local has_trailing_slash=false
-        
-        # Check if path has a trailing slash
-        if [[ "$src" == */ ]]; then
-            has_trailing_slash=true
-            is_dir=true
-        fi
-        
-        # Note: If source is a wildcard pattern, is_dir and has_trailing_slash
-        # might not be accurate, but we'll handle it in the file existence check
-        
-        # For local paths, check if it's a directory
-        if ! is_remote_path "$src" && [[ ! "$src" == *[*?]* ]]; then  # Skip check for paths with wildcards
-            if [ -d "${src%/}" ]; then
-                is_dir=true
-            elif [ -e "${src%/}" ]; then
-                # It exists but is not a directory (might be a file)
-                is_dir=false
-            else
-                # Path doesn't exist
-                echo "Warning: Source path doesn't exist: $src"
-                continue
-            fi
-        elif is_remote_path "$src" && [[ ! "$src" == *[*?]* ]]; then
-            # For remote paths, use lsjson to check if it's a directory
-            local path_type
-            path_type=$(check_remote_path_type "$src")
-            
-            case "$path_type" in
-                "dir")
-                    is_dir=true
-                    ;;
-                "file")
-                    is_dir=false
-                    ;;
-                "notfound")
-                    echo "Warning: Remote path not found: $src"
-                    continue
-                    ;;
-                "error")
-                    echo "Warning: Error checking remote path: $src"
-                    # Default to directory behavior for safety
-                    is_dir=true
-                    ;;
-            esac
-        else
-            # This is a path with wildcards
-            # We'll let rclone handle this directly
-            safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
-            local status=$?
-            if [ $status -ne 0 ]; then
-                echo "Error: rclone command failed with status $status"
-                return $status
-            fi
-            # Skip further processing for this wildcard source
-            continue
-        fi
-        
-        if [ "$is_dir" = true ] && [ "$has_trailing_slash" = false ]; then
-            # No trailing slash on directory, copy the directory itself
-            # Get directory name
-            local dirname=$(get_dirname "$src")
-            # Update the destination for this source
-            local new_dest="${destination%/}/$dirname"
-            
-            # Execute command safely
-            safe_execute "$operation" "${src%/}" "$new_dest" "${rclone_opts[@]}"
-            local status=$?
-            if [ $status -ne 0 ]; then
-                echo "Error: rclone command failed with status $status"
-                return $status
-            fi
-        else
-            # For files or directories with trailing slash, copy directly to destination
-            safe_execute "$operation" "$src" "$destination" "${rclone_opts[@]}"
-            local status=$?
-            if [ $status -ne 0 ]; then
-                echo "Error: rclone command failed with status $status"
-                return $status
-            fi
-        fi
-    done
-
-    echo "Operation completed successfully"
-    return 0
+# 路径的「最后一段名字」：去尾斜杠 → 取末段 → 去 remote: 前缀
+#   115:/null/eu → eu    115:eu → eu    115: → (空)    dir/sub → sub
+base_name() {
+    local p=${1%/}
+    p=${p##*/}
+    p=${p##*:}
+    printf '%s' "$p"
 }
 
-# If the script is being executed directly (not sourced),
-# run the function with all arguments
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-    rc "$@"
-fi
+# 把名字拼到目标后面（统一处理尾斜杠与远程根）
+join_dest() { printf '%s/%s' "${1%/}" "$2"; }
+
+# 安全地为「展示」加引号：含空格/特殊字符才用单引号包，保持中文可读
+shquote() {
+    local a=$1
+    if [[ -z $a || $a == *[[:space:]\'\"\\\|\&\;\<\>\(\)\$\`\*\?\~\#]* \
+          || $a == *'['* || $a == *']'* || $a == *'{'* || $a == *'}'* ]]; then
+        printf "'%s'" "${a//\'/\'\\\'\'}"
+    else
+        printf '%s' "$a"
+    fi
+}
+
+# 把一条命令格式化成可读、可复制粘贴的字符串
+fmt_cmd() {
+    local out='' a
+    for a in "$@"; do out+="${out:+ }$(shquote "$a")"; done
+    printf '%s' "$out"
+}
+
+print_cmd() { printf '执行: %s\n' "$(fmt_cmd "$@")" >&2; }
+
+# ── 源类型探测（只分类，绝不 die；硬错误细节打到 stderr，由主shell决定停） ──
+# 输出之一：dir / file / missing / error
+probe_type() {
+    local p=$1
+    if is_remote "$p"; then
+        local out code=0
+        out=$(rclone lsjson --stat "$p" 2>&1) || code=$?
+        if (( code == 0 )); then
+            if   [[ $out =~ \"IsDir\":[[:space:]]*true  ]]; then printf dir
+            elif [[ $out =~ \"IsDir\":[[:space:]]*false ]]; then printf file
+            else printf error; printf 'rc: 无法解析远程路径类型: %s\n' "$p" >&2; fi
+        elif (( code == 3 )); then
+            printf missing
+        else
+            printf error; printf 'rc: 探测远程路径失败: %s (%s)\n' "$p" "$out" >&2
+        fi
+    else
+        local q=${p%/}
+        if   [[ -d $q ]]; then printf dir
+        elif [[ -e $q ]]; then printf file
+        else printf missing; fi
+    fi
+}
+
+# ── 防呆：仅「无斜杠目录 且 与目标末段同名」时触发；结果写入全局 POKA_CHOICE ──
+POKA_CHOICE=''
+poka_yoke() {                       # 参数: src dst name
+    local s=$1 d=$2 name=$3 self
+    self=$(join_dest "$d" "$name")
+    if [[ ! -t 0 ]]; then
+        die "源 '$s' 与目标同名 '$name' 有歧义，且当前无法交互。
+    加尾斜杠   '$s/'   表示拷内容；
+    或显式写   '$self' 表示拷目录本身。"
+    fi
+    {
+        printf '源 %s 是目录(无尾斜杠)，与目标末段同名，可能有歧义：\n' "$s"
+        printf '  [Enter]  拷内容    → %s\n' "$(fmt_cmd rclone "$OP" "${RCLONE_OPTS[@]}" "$s" "$d")"
+        printf '  [其他键] 目录本身  → %s\n' "$(fmt_cmd rclone "$OP" "${RCLONE_OPTS[@]}" "$s" "$self")"
+        printf '  (Ctrl-C 取消)  > '
+    } >&2
+    local key=''
+    IFS= read -rsn1 key || true
+    printf '\n' >&2
+    if [[ -z $key ]]; then POKA_CHOICE=contents; else POKA_CHOICE=diritself; fi
+}
+
+# ── 执行一条 copy/move ───────────────────────────────────────────────────────
+run_op() {                          # 参数: src dst
+    local cmd=(rclone "$OP" "${RCLONE_OPTS[@]}" "$1" "$2") code=0
+    print_cmd "${cmd[@]}"
+    "${cmd[@]}" || code=$?
+    if (( code != 0 )); then
+        printf 'rc: rclone %s 失败(退出码 %d): %s\n' "$OP" "$code" "$1" >&2
+        exit "$code"                 # 传播 rclone 的真实退出码,便于脚本判断
+    fi
+}
+
+# ── 把单个源按 rsync 斜杠语义解析后执行 ──────────────────────────────────────
+resolve_source() {                  # 参数: src dst
+    local s=$1 d=$2
+
+    # 有尾斜杠 = 明确「拷内容」；通配符 = 交给 rclone —— 都直透，不探测
+    if [[ $s == */ ]] || has_glob "$s"; then
+        run_op "$s" "$d"; return
+    fi
+
+    case "$(probe_type "$s")" in
+        file)    run_op "$s" "$d" ;;                 # 文件 → 进目标目录
+        missing) die "源不存在: $s" ;;
+        error)   die "无法探测源(已停止以防出错): $s" ;;
+        dir)
+            local sbase dbase
+            sbase=$(base_name "$s")
+            dbase=$(base_name "$d")
+            if [[ $sbase == "$dbase" ]]; then        # 同名 → 防呆
+                poka_yoke "$s" "$d" "$sbase"
+                if [[ $POKA_CHOICE == contents ]]; then
+                    run_op "$s" "$d"
+                else
+                    run_op "$s" "$(join_dest "$d" "$sbase")"
+                fi
+            else                                     # 不同名 → 静默「目录本身」
+                run_op "$s" "$(join_dest "$d" "$sbase")"
+            fi
+            ;;
+    esac
+}
+
+# ── 帮助 ────────────────────────────────────────────────────────────────────
+usage() {
+    cat <<'EOF'
+rc — rclone 的薄封装，保持 rsync 的尾斜杠语义
+
+用法:
+    rc copy [选项] 源... 目标
+    rc move [选项] 源... 目标
+    rc ls   [选项] remote:路径
+
+斜杠语义(核心):
+    rc copy dir  远程:备份/     # 拷目录本身 → 远程:备份/dir   (不必再敲一遍 dir)
+    rc copy dir/ 远程:备份/     # 拷内容     → 远程:备份/
+    rc copy a.txt 远程:备份/    # 文件进目录 → 远程:备份/a.txt
+
+选项:
+    -t N        并发数(--transfers N)，默认跟 rclone 走
+    -h          显示本帮助
+    其余任何 -/-- 选项原样透传给 rclone；带值的请用 --flag=value 形式
+    (如 --bwlimit=1M)，布尔开关直接写(如 --115-upload-history)。
+
+说明:
+    - 默认开启进度(-P)。
+    - 只探测「源」；目标不存在由 rclone 自动创建。
+    - 源是「无尾斜杠目录」且与目标末段同名时，会交互确认拷内容还是目录本身
+      (回车=内容，其他键=目录本身，Ctrl-C=取消)。
+    - 出错立即停，绝不替你猜。执行前会打印真实 rclone 命令。
+    - 远程需先用 'rclone config' 配置好。
+EOF
+}
+
+# ── 参数解析 ────────────────────────────────────────────────────────────────
+main() {
+    local OP_RAW=${1:-}
+    case $OP_RAW in
+        ''|-h|--help) usage; exit 0 ;;
+        copy) OP=copy ;;
+        move) OP=move ;;
+        ls)   OP=lsf  ;;
+        *)    die "未知操作 '$OP_RAW'（支持 copy/move/ls）。-h 看帮助。" ;;
+    esac
+    shift
+
+    local -a opts=() pos=()
+    local end=0 v
+    while (($#)); do
+        if (( end )); then pos+=("$1"); shift; continue; fi
+        case $1 in
+            --)        end=1 ;;
+            -h|--help) usage; exit 0 ;;
+            -t)  shift; (($#)) || die "-t 需要一个数字"
+                 [[ $1 =~ ^[0-9]+$ ]] || die "-t 需要数字，得到 '$1'"
+                 opts+=(--transfers "$1") ;;
+            -t=*) v=${1#-t=}; [[ $v =~ ^[0-9]+$ ]] || die "-t 需要数字，得到 '$v'"
+                  opts+=(--transfers "$v") ;;
+            -t[0-9]*) v=${1#-t}; [[ $v =~ ^[0-9]+$ ]] || die "-t 需要数字，得到 '$v'"
+                  opts+=(--transfers "$v") ;;
+            -*)  opts+=("$1") ;;                     # 透传 flag(不透明)
+            *)   pos+=("$1") ;;                      # 位置参数(源/目标)
+        esac
+        shift
+    done
+
+    # ls：单个远程路径，原样透传(不加 -P)
+    if [[ $OP == lsf ]]; then
+        (( ${#pos[@]} == 1 )) || die "ls 需要且仅需要一个远程路径"
+        is_remote "${pos[0]}" || die "ls 需要远程路径(如 remote:path)，得到 '${pos[0]}'"
+        local -a cmd=(rclone lsf ${opts[@]+"${opts[@]}"} "${pos[0]}")
+        print_cmd "${cmd[@]}"
+        exec "${cmd[@]}"
+    fi
+
+    # copy/move：末参=目标，前面都是源
+    (( ${#pos[@]} >= 2 )) || die "$OP_RAW 需要至少一个源和一个目标
+    (若文件名以 - 开头，用 -- 分隔，如: rc $OP_RAW -- -名字.mkv 目标/)"
+    local dest=${pos[-1]}
+    local -a sources=("${pos[@]:0:${#pos[@]}-1}")
+
+    # 开传前一次性校验：空参数(多半是变量没展开)→ 一个都不传，绝不替你猜
+    local s
+    [[ -n $dest ]] || die "目标为空（变量没展开？）。已停止，绝不替你猜。"
+    for s in "${sources[@]}"; do
+        [[ -n $s ]] || die "存在空的源参数（变量没展开？）。已停止，一个都没传。"
+    done
+
+    RCLONE_OPTS=(-P ${opts[@]+"${opts[@]}"})
+    for s in "${sources[@]}"; do
+        resolve_source "$s" "$dest"
+    done
+}
+
+main "$@"
