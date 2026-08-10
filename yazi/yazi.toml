@@ -15,14 +15,13 @@ edit = [
     { run = 'code "%*"', desc = 'VS Code', orphan = true, for = "windows" },
 ]
 
-
+[[plugin.prepend_fetchers]]
+url   = "*"
+run   = "git"
+group = "git"
 
 [[plugin.prepend_fetchers]]
-id   = "git"
-name = "*"
-run  = "git"
+url   = "*/"
+run   = "git"
+group = "git"
 
-[[plugin.prepend_fetchers]]
-id   = "git"
-name = "*/"
-run  = "git"

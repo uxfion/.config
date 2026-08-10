@@ -1,15 +1,24 @@
---- @since 25.5.28
+--- @since 26.1.22
 
 local selected_or_hovered = ya.sync(function()
 	local tab, paths = cx.active, {}
-	for _, u in pairs(tab.selected) do
-		paths[#paths + 1] = tostring(u)
+	for _, f in pairs(tab.selected) do
+		paths[#paths + 1] = tostring(f.url or f) -- TODO: remove
 	end
 	if #paths == 0 and tab.current.hovered then
 		paths[1] = tostring(tab.current.hovered.url)
 	end
 	return paths
 end)
+
+local function fail(s, ...)
+	ya.notify {
+		title = "Chmod",
+		content = string.format(s, ...),
+		level = "error",
+		timeout = 5,
+	}
+end
 
 return {
 	entry = function()
@@ -22,20 +31,17 @@ return {
 
 		local value, event = ya.input {
 			title = "Chmod:",
-			position = { "top-center", y = 3, w = 40 },
+			pos = { "top-center", y = 3, w = 40 },
 		}
 		if event ~= 1 then
 			return
 		end
 
-		local status, err = Command("chmod"):arg(value):arg(urls):spawn():wait()
-		if not status or not status.success then
-			ya.notify {
-				title = "Chmod",
-				content = string.format("Chmod on selected files failed, error: %s", status and status.code or err),
-				level = "error",
-				timeout = 5,
-			}
+		local output, err = Command("chmod"):arg(value):arg(urls):output()
+		if not output then
+			fail("Failed to run chmod: %s", err)
+		elseif not output.status.success then
+			fail("Chmod failed with stderr:\n%s", output.stderr:gsub("^chmod:%s*", ""))
 		end
 	end,
 }
