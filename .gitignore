@@ -15,6 +15,11 @@
 !/wezterm/
 !/ccstatusline/
 
+# Herdr：仅同步配置，其余服务器本地文件全部忽略
+!/herdr/
+/herdr/*
+!/herdr/config.toml
+
 # 如果在这些目录中还有不想跟踪的文件，可以在此处添加规则排除
 # 例如，排除所有的 .tmp 文件
 *.tmp
