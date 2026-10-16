@@ -399,7 +399,7 @@ download_btop_binary() {
     elif [ "$arch" = "aarch64" ]; then
         ido download_github_release aristocratos/btop $tdir linux aarch64  # static
     fi
-    ido tar -xjf $tdir/btop-*.tbz -C $tdir
+    ido tar -xzf $tdir/btop-*.tar.gz -C $tdir
     ido cp $tdir/btop/bin/btop ~/.local/bin/btop
     ido chmod +x ~/.local/bin/btop
     # ido mkdir -p ~/.config/btop
